@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramenta de Brainstorming</title>
+    <style>
+        /* --- ESTILOS CSS --- */
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* Evita barras de rolagem indesejadas no corpo */
+        }
+
+        /* Cabeçalho e Controlos */
+        header {
+            background-color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        h2 { margin: 0; margin-right: auto; color: #333; font-size: 1.2rem; }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-add { background-color: #4CAF50; color: white; }
+        .btn-add:hover { background-color: #45a049; }
+
+        .btn-export { background-color: #2196F3; color: white; }
+        .btn-export:hover { background-color: #1e88e5; }
+
+        .btn-clear { background-color: #ff9800; color: white; }
+        .btn-clear:hover { background-color: #e68900; }
+
+        /* Área do Quadro (Board) */
+        #board {
+            flex-grow: 1;
+            position: relative; /* Necessário para os cartões absolute funcionarem */
+            background-image: radial-gradient(#ccc 1px, transparent 1px);
+            background-size: 20px 20px; /* Efeito de grelha subtil */
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        #board:active {
+            cursor: grabbing;
+        }
+
+        /* Estilo do Cartão (Post-it) */
+        .card {
+            position: absolute;
+            width: 200px;
+            min-height: 100px;
+            background-color: #fff740; /* Amarelo Post-it */
+            padding: 15px;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
+            border-radius: 2px;
+            cursor: move;
+            user-select: none; /* Impede seleção de texto ao arrastar */
+            font-family: 'Comic Sans MS', 'Marker Felt', sans-serif; /* Fonte manuscrita */
+            font-size: 1.1rem;
+            color: #333;
+            transform: rotate(-1deg); /* Leve inclinação para realismo */
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .card:active {
+            transform: scale(1.02);
+            box-shadow: 4px 8px 12px rgba(0,0,0,0.3);
+            z-index: 999 !important; /* Traz para frente ao clicar */
+        }
+
+        /* Botãozinho de fechar no cartão */
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            color: #555;
+            font-weight: bold;
+            font-size: 12px;
+            font-family: sans-serif;
+            opacity: 0.5;
+        }
+        .close-btn:hover { opacity: 1; color: red; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>Brainstorming Board</h2>
+        <input type="text" id="ideaInput" placeholder="Escreva uma ideia e pressione Enter...">
+        <button class="btn-add" onclick="addCard()">+ Adicionar</button>
+        <button class="btn-export" onclick="exportData()">Baixar Lista (Txt)</button>
+        <button class="btn-clear" onclick="clearBoard()">Limpar Tudo</button>
+    </header>
+
+    <div id="board">
+        <div id="instruction-msg" style="color: #aaa; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">
+            Adicione ideias acima ou arraste os cartões aqui.
+        </div>
+    </div>
+
+    <script>
+        /* --- LÓGICA JAVASCRIPT --- */
+
+        const board = document.getElementById('board');
+        const input = document.getElementById('ideaInput');
+        let zIndexCounter = 1; // Para controlar qual cartão está por cima
+
+        // 1. Adicionar Cartão ao pressionar Enter
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addCard();
+            }
+        });
+
+        // 2. Função Criar Cartão
+        function addCard() {
+            const text = input.value.trim();
+            if (text === "") return;
+
+            // Cria o elemento HTML do cartão
+            const card = document.createElement('div');
+            card.classList.add('card');
+            
+            // Posição aleatória inicial (para não empilhar tudo no canto)
+            const randomX = 50 + Math.random() * (window.innerWidth - 300);
+            const randomY = 50 + Math.random() * (window.innerHeight - 200);
+            
+            card.style.left = randomX + 'px';
+            card.style.top = randomY + 'px';
+            card.style.zIndex = zIndexCounter++; // Garante que o novo fica por cima
+            
+            // Conteúdo do cartão
+            card.innerHTML = `
+                <span class="close-btn" onclick="this.parentElement.remove()">x</span>
+                ${text}
+            `;
+
+            // Adiciona funcionalidade de arrastar a este cartão específico
+            makeDraggable(card);
+
+            // Adiciona ao quadro e limpa o input
+            board.appendChild(card);
+            input.value = '';
+            
+            // Remove a mensagem de instrução se existir
+            const msg = document.getElementById('instruction-msg');
+            if(msg) msg.style.display = 'none';
+        }
+
+        // 3. Função "Drag and Drop" (Arrastar)
+        function makeDraggable(el) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            el.addEventListener('mousedown', (e) => {
+                // Ignorar se clicar no botão de fechar
+                if(e.target.classList.contains('close-btn')) return;
+
+                isDragging = true;
+                
+                // Traz o cartão clicado para a frente
+                el.style.zIndex = zIndexCounter++;
+
+                // Calcula onde o rato clicou RELATIVAMENTE ao cartão
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+                
+                // Muda cursor
+                el.style.cursor = 'grabbing';
+            });
+
+            // O evento mousemove deve ser no window para não perder o arrasto se mover muito rápido
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                el.style.left = `${initialLeft + dx}px`;
+                el.style.top = `${initialTop + dy}px`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                el.style.cursor = 'move';
+            });
+        }
+
+        // 4. Função Exportar (Gera ficheiro .txt)
+        function exportData() {
+            const cards = document.querySelectorAll('.card');
+            if (cards.length === 0) {
+                alert("Não há cartões para exportar.");
+                return;
+            }
+
+            let content = "--- BRAINSTORMING SESSION ---\n\n";
+            cards.forEach((card, index) => {
+                // Pegamos o texto do cartão (removendo o 'x' do botão fechar)
+                const cleanText = card.innerText.replace('x\n', '').trim();
+                content += `${index + 1}. ${cleanText}\n`;
+            });
+
+            // Cria um "blob" (arquivo virtual) e força o download
+            const blob = new Blob([content], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "brainstorming-export.txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // 5. Função Limpar
+        function clearBoard() {
+            if(confirm("Tem a certeza que quer apagar todos os cartões?")) {
+                board.innerHTML = '<div id="instruction-msg" style="color: #aaa; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">Adicione ideias acima ou arraste os cartões aqui.</div>';
+                zIndexCounter = 1;
+            }
+        }
+    </script>
+</body>
+</html>

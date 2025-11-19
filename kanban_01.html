@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban de Planejamento</title>
+    <style>
+        /* ESTILO GERAL (CSS) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* ÁREA DE CONTROLO (Input e Botões) */
+        .controls {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: opacity 0.3s;
+        }
+
+        button:hover { opacity: 0.8; }
+
+        #btn-add { background-color: #2c3e50; }
+        #btn-clear { background-color: #c0392b; }
+        #btn-export { background-color: #27ae60; }
+
+        /* ESTRUTURA DO BOARD */
+        .board {
+            display: flex;
+            gap: 15px;
+            flex-grow: 1; /* Ocupa o resto da altura da página */
+            overflow-x: auto; /* Permite scroll lateral se o ecrã for pequeno */
+            align-items: flex-start; /* Importante para a altura dinâmica */
+        }
+
+        /* COLUNAS */
+        .column {
+            flex: 1;
+            min-width: 250px;
+            background-color: #e2e4e6;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: fit-content; /* Altura ajusta-se ao conteúdo */
+            min-height: 150px; /* Altura mínima */
+        }
+
+        .column-header {
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .task-list {
+            padding: 10px;
+            min-height: 100px;
+            transition: background-color 0.2s;
+        }
+
+        /* CORES DAS COLUNAS */
+        .col-espera .column-header { background-color: #7f8c8d; } /* Cinza */
+        .col-iniciado .column-header { background-color: #2980b9; } /* Azul */
+        .col-validando .column-header { background-color: #8e44ad; } /* Roxo */
+        .col-concluido .column-header { background-color: #27ae60; } /* Verde */
+        .col-cancelado .column-header { background-color: #c0392b; } /* Vermelho */
+
+        /* CARTÕES (POST-ITS) */
+        .card {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            cursor: grab;
+            font-size: 14px;
+            line-height: 1.4;
+            border-left: 4px solid transparent;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .card:active { cursor: grabbing; }
+        
+        /* Cor da borda do cartão baseada na coluna (opcional, mas ajuda visualmente) */
+        .col-espera .card { border-left-color: #7f8c8d; }
+        .col-iniciado .card { border-left-color: #2980b9; }
+        .col-validando .card { border-left-color: #8e44ad; }
+        .col-concluido .card { border-left-color: #27ae60; }
+        .col-cancelado .card { border-left-color: #c0392b; }
+
+        /* Botão de fechar no cartão */
+        .card-delete {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0 5px;
+        }
+        .card-delete:hover { color: #c0392b; }
+
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <input type="text" id="taskInput" placeholder="Digite a nova tarefa aqui..." onkeypress="handleEnter(event)">
+        <button id="btn-add" onclick="addTask()">+ Adicionar</button>
+        <button id="btn-export" onclick="exportBoard()">Exportar Texto</button>
+        <button id="btn-clear" onclick="clearBoard()">Limpar Tudo</button>
+    </div>
+
+    <div class="board">
+        
+        <div class="column col-espera">
+            <div class="column-header">Em Espera</div>
+            <div class="task-list" id="espera" ondrop="drop(event)" ondragover="allowDrop(event)">
+                </div>
+        </div>
+
+        <div class="column col-iniciado">
+            <div class="column-header">Iniciado</div>
+            <div class="task-list" id="iniciado" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column col-validando">
+            <div class="column-header">Validando</div>
+            <div class="task-list" id="validando" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column col-concluido">
+            <div class="column-header">Concluído</div>
+            <div class="task-list" id="concluido" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="column col-cancelado">
+            <div class="column-header">Cancelado</div>
+            <div class="task-list" id="cancelado" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // LÓGICA (JAVASCRIPT)
+
+        // 1. Funções de Drag and Drop (Arrastar e Soltar)
+        function allowDrop(ev) {
+            ev.preventDefault(); // Permite que o elemento receba o drop
+        }
+
+        function drag(ev) {
+            // Guarda o ID do elemento que está a ser arrastado
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var card = document.getElementById(data);
+            
+            // Verifica se o alvo é uma lista de tarefas ou um cartão dentro dela
+            let target = ev.target;
+            
+            // Se soltar em cima de outro cartão ou cabeçalho, procura o pai que é a lista
+            while (!target.classList.contains('task-list')) {
+                target = target.parentElement;
+                if(!target) return; // Segurança
+            }
+            
+            target.appendChild(card);
+        }
+
+        // 2. Adicionar Tarefas
+        function addTask() {
+            const input = document.getElementById("taskInput");
+            const text = input.value.trim();
+
+            if (text === "") {
+                alert("Por favor, escreva algo para o cartão.");
+                return;
+            }
+
+            createCardElement(text, "espera"); // Adiciona sempre na primeira coluna
+            input.value = ""; // Limpa o input
+            input.focus();
+        }
+
+        // Atalho para adicionar com a tecla Enter
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        }
+
+        // Função auxiliar para criar o HTML do cartão
+        function createCardElement(text, columnId) {
+            const id = "card-" + new Date().getTime(); // Gera um ID único baseado no tempo
+            const card = document.createElement("div");
+            
+            card.className = "card";
+            card.id = id;
+            card.draggable = true;
+            card.ondragstart = function(event) { drag(event) };
+            
+            // Conteúdo do cartão + botão de apagar individual
+            card.innerHTML = `
+                ${text}
+                <button class="card-delete" onclick="deleteCard('${id}')">x</button>
+            `;
+
+            document.getElementById(columnId).appendChild(card);
+        }
+
+        // 3. Funções de Limpeza
+        function deleteCard(cardId) {
+            const card = document.getElementById(cardId);
+            if (card) {
+                card.remove();
+            }
+        }
+
+        function clearBoard() {
+            if (confirm("Tens a certeza que queres apagar todos os cartões?")) {
+                const lists = document.querySelectorAll(".task-list");
+                lists.forEach(list => list.innerHTML = "");
+            }
+        }
+
+        // 4. Exportar para Texto
+        function exportBoard() {
+            let content = "RELATÓRIO KANBAN\n=================\n\n";
+            
+            // Percorre todas as colunas
+            const columns = [
+                {id: 'espera', name: '1. EM ESPERA'},
+                {id: 'iniciado', name: '2. INICIADO'},
+                {id: 'validando', name: '3. VALIDANDO'},
+                {id: 'concluido', name: '4. CONCLUÍDO'},
+                {id: 'cancelado', name: '5. CANCELADO'}
+            ];
+
+            columns.forEach(col => {
+                content += `[ ${col.name} ]\n`;
+                const list = document.getElementById(col.id);
+                const cards = list.getElementsByClassName("card");
+                
+                if (cards.length === 0) {
+                    content += "  (Vazio)\n";
+                } else {
+                    for (let card of cards) {
+                        // Pega apenas o texto, removendo o "x" do botão
+                        let text = card.innerText.replace("x\n", "").replace("\nx", "").trim(); 
+                        content += `  - ${text}\n`;
+                    }
+                }
+                content += "\n-----------------\n\n";
+            });
+
+            // Cria um ficheiro temporário para download
+            const blob = new Blob([content], { type: "text/plain" });
+            const anchor = document.createElement("a");
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = "kanban-export.txt";
+            anchor.click();
+        }
+    </script>
+</body>
+</html>

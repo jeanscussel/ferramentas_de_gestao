@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramenta de Planejamento 5W2H</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* ESTILIZAÇÃO (CSS) */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --danger-color: #e74c3c; /* Nova cor para o botão limpar */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        /* Botoes de Ação */
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Permite quebra de linha em telas pequenas */
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.1s;
+            color: white;
+        }
+        
+        button:active { transform: scale(0.98); }
+
+        .btn-img { background-color: var(--accent-color); }
+        .btn-img:hover { background-color: #2980b9; }
+        
+        .btn-txt { background-color: var(--primary-color); }
+        .btn-txt:hover { background-color: #1a252f; }
+
+        /* Estilo do botão Limpar */
+        .btn-clear { background-color: var(--danger-color); }
+        .btn-clear:hover { background-color: #c0392b; }
+
+        /* Grid do 5W2H */
+        .board-container {
+            background-color: var(--bg-color);
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .grid-5w2h {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto auto;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-5w2h { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cores específicas para categorias */
+        .card.what { border-color: #e74c3c; }
+        .card.why { border-color: #e67e22; }
+        .card.where { border-color: #f1c40f; }
+        .card.when { border-color: #2ecc71; }
+        .card.who { border-color: #1abc9c; }
+        .card.how { border-color: #3498db; }
+        .card.how-much { border-color: #9b59b6; }
+
+        .card.how, .card.how-much { grid-column: span 2; }
+        @media (max-width: 768px) {
+            .card.how, .card.how-much { grid-column: span 1; }
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .card span {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            resize: vertical;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Planejamento 5W2H</h1>
+    <p class="subtitle">Preencha os campos abaixo e exporte seu plano de ação.</p>
+
+    <div class="controls">
+        <button class="btn-img" onclick="exportarImagem()">📸 Baixar Imagem</button>
+        <button class="btn-txt" onclick="exportarTexto()">📄 Baixar Texto</button>
+        <button class="btn-clear" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+    </div>
+
+    <div class="board-container" id="capture-area">
+        <div class="grid-5w2h">
+            <div class="card what">
+                <h3>1. WHAT (O que?)</h3>
+                <span>Qual é a ação ou objetivo?</span>
+                <textarea id="what" placeholder="Descreva o que será feito..."></textarea>
+            </div>
+            <div class="card why">
+                <h3>2. WHY (Por que?)</h3>
+                <span>Qual a justificativa/motivo?</span>
+                <textarea id="why" placeholder="Por que isso é necessário?"></textarea>
+            </div>
+            <div class="card where">
+                <h3>3. WHERE (Onde?)</h3>
+                <span>Onde será realizado?</span>
+                <textarea id="where" placeholder="Local ou departamento..."></textarea>
+            </div>
+            <div class="card when">
+                <h3>4. WHEN (Quando?)</h3>
+                <span>Prazos e datas.</span>
+                <textarea id="when" placeholder="Data de início e fim..."></textarea>
+            </div>
+            <div class="card who">
+                <h3>5. WHO (Quem?)</h3>
+                <span>Quem é o responsável?</span>
+                <textarea id="who" placeholder="Nome dos responsáveis..."></textarea>
+            </div>
+            <div class="card how">
+                <h3>6. HOW (Como?)</h3>
+                <span>Método ou etapas.</span>
+                <textarea id="how" placeholder="Detalhamento de como será executado..."></textarea>
+            </div>
+            <div class="card how-much">
+                <h3>7. HOW MUCH (Quanto custa?)</h3>
+                <span>Custo ou orçamento.</span>
+                <textarea id="how-much" placeholder="Orçamento estimado..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LÓGICA JAVASCRIPT
+
+        // Função para exportar como Imagem
+        function exportarImagem() {
+            const element = document.getElementById("capture-area");
+            html2canvas(element).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'planejamento-5w2h.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(err => {
+                alert("Erro ao gerar imagem.");
+                console.error(err);
+            });
+        }
+
+        // Função para exportar como Texto
+        function exportarTexto() {
+            const data = {
+                what: document.getElementById('what').value,
+                why: document.getElementById('why').value,
+                where: document.getElementById('where').value,
+                when: document.getElementById('when').value,
+                who: document.getElementById('who').value,
+                how: document.getElementById('how').value,
+                howMuch: document.getElementById('how-much').value
+            };
+
+            const textoFinal = `
+PLANEJAMENTO 5W2H
+--------------------------------
+1. WHAT (O que): ${data.what}
+2. WHY (Por que): ${data.why}
+3. WHERE (Onde): ${data.where}
+4. WHEN (Quando): ${data.when}
+5. WHO (Quem): ${data.who}
+6. HOW (Como): ${data.how}
+7. HOW MUCH (Quanto): ${data.howMuch}
+--------------------------------
+Gerado em: ${new Date().toLocaleString()}
+            `;
+
+            const blob = new Blob([textoFinal], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'planejamento-5w2h.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // NOVA FUNÇÃO: Limpar Tudo
+        function limparTudo() {
+            // Exibe uma janela de confirmação
+            const confirmacao = confirm("Tem a certeza que deseja apagar todos os campos? Esta ação não pode ser desfeita.");
+            
+            // Se o usuário clicar em "OK" (true)
+            if (confirmacao) {
+                // Seleciona todos os textareas da página
+                const textareas = document.querySelectorAll('textarea');
+                
+                // Passa por cada um deles e define o valor como vazio
+                textareas.forEach(campo => {
+                    campo.value = "";
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Sorting Dinâmico</title>
+    <style>
+        /* --- Estilos Gerais --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- TELA 1: CONFIGURAÇÃO (FORMULÁRIO) --- */
+        #setup-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            background-color: #fff;
+            z-index: 100;
+        }
+
+        .setup-box {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        textarea:focus { outline: none; border-color: #0d6efd; }
+
+        .counter { font-size: 12px; color: #666; margin-bottom: 15px; text-align: right; display: block; }
+
+        .btn-start {
+            background-color: #0d6efd;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-start:hover { background-color: #0b5ed7; }
+
+        /* --- TELA 2: APLICAÇÃO (Escondida inicialmente) --- */
+        #app-screen {
+            display: none; /* Começa invisível */
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* --- Estilos do Card Sort (Reaproveitados) --- */
+        header {
+            padding: 15px 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h2 { margin: 0; font-size: 18px; color: #333; }
+        .header-info p { margin: 5px 0 0 0; font-size: 13px; color: #666; }
+
+        .controls { display: flex; gap: 10px; }
+
+        button { padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-reset { background-color: #fff; border: 1px solid #dc3545; color: #dc3545; }
+        .btn-reset:hover { background-color: #dc3545; color: white; }
+        .btn-save { background-color: #198754; color: white; }
+        .btn-save:hover { background-color: #157347; }
+        .btn-back { background-color: #6c757d; color: white; } 
+        .btn-back:hover { background-color: #5c636a; }
+
+        .top-area { flex-grow: 1; padding: 20px; overflow: auto; background-color: #e9ecef; }
+        .grid-container { display: grid; grid-template-columns: repeat(7, 200px); gap: 15px; padding-bottom: 20px; }
+
+        .dropzone-column {
+            background-color: #fff; border-radius: 8px; padding: 10px;
+            min-height: 300px; display: flex; flex-direction: column; gap: 8px;
+            border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .dropzone-column h3 { font-size: 12px; text-align: center; margin: 0 0 10px 0; color: #aaa; pointer-events: none; }
+
+        .bottom-area {
+            height: 25vh; background-color: #fff; border-top: 4px solid #6c757d;
+            padding: 15px; overflow-y: auto; display: flex; flex-wrap: wrap;
+            gap: 10px; align-content: flex-start; justify-content: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            padding: 10px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+            cursor: grab; width: 170px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            user-select: none; transition: all 0.2s ease; position: relative;
+        }
+        .card:active { cursor: grabbing; }
+        .card.dragging { opacity: 0.5; transform: scale(0.95); }
+        
+        .card.gray-style { background-color: #e0e0e0; color: #333; border: 1px solid #ccc; }
+        .card.purple-style { background-color: #6f42c1; color: white; padding: 15px 10px; font-weight: bold; }
+        .card.blue-style { background-color: #0d6efd; color: white; }
+        .dragover { background-color: #d1e7dd; border-style: dashed; }
+
+        .sub-level { margin-left: 25px; width: 145px; }
+        .sub-level::before { content: "↳"; position: absolute; left: -15px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="setup-screen">
+        <div class="setup-box">
+            <h2>Passo 1: Crie os Tópicos</h2>
+            <p style="color: #666; margin-bottom: 15px;">Digite ou cole os itens do menu abaixo, <strong>um por linha</strong>.</p>
+            
+            <textarea id="input-items" placeholder="Exemplo:&#10;Início&#10;Fale Conosco&#10;Recursos Humanos..." oninput="updateCounter()"></textarea>
+            <span class="counter" id="item-counter">0 / 50 itens</span>
+            
+            <button class="btn-start" onclick="startSorting()">Gerar Cards e Começar &rarr;</button>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <header>
+            <div class="header-info">
+                <h2>Card Sorting</h2>
+                <p>Arraste para organizar. <strong>1º item = Título</strong>. Clique para <strong>Submenu</strong>.</p>
+            </div>
+            <div class="controls">
+                <button class="btn-back" onclick="goBack()">Voltar</button>
+                <button class="btn-reset" onclick="resetBoard()">Reiniciar</button>
+                <button class="btn-save" onclick="saveResults()">Salvar Resultado</button>
+            </div>
+        </header>
+
+        <div class="top-area">
+            <div class="grid-container">
+                <div class="dropzone-column"><h3>Grupo 1</h3></div>
+                <div class="dropzone-column"><h3>Grupo 2</h3></div>
+                <div class="dropzone-column"><h3>Grupo 3</h3></div>
+                <div class="dropzone-column"><h3>Grupo 4</h3></div>
+                <div class="dropzone-column"><h3>Grupo 5</h3></div>
+                <div class="dropzone-column"><h3>Grupo 6</h3></div>
+                <div class="dropzone-column"><h3>Grupo 7</h3></div>
+            </div>
+        </div>
+
+        <div class="bottom-area dropzone-bank" id="bank">
+            </div>
+    </div>
+
+    <script>
+        // Variáveis Globais
+        const setupScreen = document.getElementById('setup-screen');
+        const appScreen = document.getElementById('app-screen');
+        const inputItems = document.getElementById('input-items');
+        const itemCounter = document.getElementById('item-counter');
+        const bank = document.getElementById('bank');
+        let draggedItem = null;
+
+        // --- Lógica da TELA 1 (Formulário) ---
+
+        function updateCounter() {
+            const lines = inputItems.value.split('\n').filter(line => line.trim() !== '');
+            itemCounter.innerText = `${lines.length} / 50 itens`;
+            if(lines.length > 50) {
+                itemCounter.style.color = 'red';
+                itemCounter.innerText += " (Limite excedido!)";
+            } else {
+                itemCounter.style.color = '#666';
+            }
+        }
+
+        function startSorting() {
+            const text = inputItems.value;
+            // Quebra por linha e remove linhas vazias
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+
+            if (lines.length === 0) {
+                alert("Por favor, insira pelo menos um item.");
+                return;
+            }
+            if (lines.length > 50) {
+                alert("Você ultrapassou o limite de 50 itens. Por favor reduza a lista.");
+                return;
+            }
+
+            // Limpa o banco atual e gera novos cards
+            bank.innerHTML = '';
+            lines.forEach(line => {
+                createCardElement(line.trim());
+            });
+
+            // Troca as telas
+            setupScreen.style.display = 'none';
+            appScreen.style.display = 'flex';
+
+            // Inicializa cores
+            updateAllColors();
+        }
+
+        function createCardElement(text) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.draggable = true;
+            card.innerText = text;
+            
+            // Adiciona os eventos ao novo cartão criado
+            addCardEvents(card);
+            
+            bank.appendChild(card);
+        }
+
+        function goBack() {
+            if(confirm("Ao voltar, a organização atual será perdida. Deseja continuar?")) {
+                appScreen.style.display = 'none';
+                setupScreen.style.display = 'flex';
+                
+                // Reseta os cards para o banco (opcional, pois ao clicar em "Começar" ele recria)
+                const allCards = document.querySelectorAll('.card');
+                allCards.forEach(c => bank.appendChild(c));
+            }
+        }
+
+        // --- Lógica da TELA 2 (Drag & Drop) ---
+
+        // Seleciona colunas e banco
+        const columns = document.querySelectorAll('.dropzone-column');
+        const allDropzones = [...columns, bank];
+
+        // Função para adicionar eventos a um cartão (usada na criação dinâmica)
+        function addCardEvents(card) {
+            card.addEventListener('dragstart', function() {
+                draggedItem = this;
+                setTimeout(() => this.classList.add('dragging'), 0);
+            });
+            card.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                draggedItem = null;
+                updateAllColors();
+            });
+            card.addEventListener('click', function() {
+                if (!this.parentElement.classList.contains('dropzone-bank') && !this.classList.contains('purple-style')) {
+                    this.classList.toggle('sub-level');
+                }
+            });
+        }
+
+        // Eventos das Zonas (Colunas e Banco)
+        allDropzones.forEach(zone => {
+            zone.addEventListener('dragover', e => e.preventDefault());
+            zone.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            zone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            zone.addEventListener('drop', function() {
+                this.classList.remove('dragover');
+                if (draggedItem) {
+                    this.appendChild(draggedItem);
+                    if(this.classList.contains('dropzone-bank')) {
+                        draggedItem.classList.remove('sub-level');
+                    }
+                }
+            });
+        });
+
+        // --- Lógica de Cores ---
+        function updateAllColors() {
+            // Banco
+            bank.querySelectorAll('.card').forEach(card => {
+                resetCardStyle(card);
+                card.classList.add('gray-style');
+            });
+
+            // Colunas
+            columns.forEach(col => {
+                const colCards = col.querySelectorAll('.card');
+                colCards.forEach((card, index) => {
+                    resetCardStyle(card);
+                    if (index === 0) {
+                        card.classList.add('purple-style');
+                        card.classList.remove('sub-level');
+                    } else {
+                        card.classList.add('blue-style');
+                    }
+                });
+            });
+        }
+
+        function resetCardStyle(card) {
+            card.classList.remove('gray-style', 'purple-style', 'blue-style');
+        }
+
+        function resetBoard() {
+            if(confirm("Tem certeza que deseja reiniciar a organização?")) {
+                const allCards = document.querySelectorAll('.card');
+                allCards.forEach(card => {
+                    bank.appendChild(card);
+                    card.classList.remove('sub-level');
+                });
+                updateAllColors();
+            }
+        }
+
+        function saveResults() {
+            let content = "RESULTADO DO CARD SORTING\n";
+            content += "Data: " + new Date().toLocaleString() + "\n";
+            content += "====================================\n\n";
+            let hasContent = false;
+
+            columns.forEach((col, index) => {
+                const cardsInCol = col.querySelectorAll('.card');
+                if(cardsInCol.length > 0) {
+                    hasContent = true;
+                    content += `GRUPO ${index + 1}\n----------------\n`;
+                    cardsInCol.forEach(card => {
+                        let itemText = card.innerText;
+                        if (card.classList.contains('purple-style')) {
+                            content += `[TÍTULO] ${itemText}\n`;
+                        } else if (card.classList.contains('sub-level')) {
+                            content += `      -> ${itemText}\n`;
+                        } else {
+                            content += `   - ${itemText}\n`;
+                        }
+                    });
+                    content += "\n";
+                }
+            });
+
+            const bankCards = bank.querySelectorAll('.card');
+            if(bankCards.length > 0) {
+                content += "ITENS NÃO UTILIZADOS:\n";
+                bankCards.forEach(card => {
+                    content += `( ) ${card.innerText}\n`;
+                });
+            }
+
+            if (!hasContent) { alert("Ainda não organizou nenhum item!"); return; }
+
+            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+            const anchor = document.createElement("a");
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = "resultado_cardsort.txt";
+            anchor.click();
+        }
+    </script>
+</body>
+</html>

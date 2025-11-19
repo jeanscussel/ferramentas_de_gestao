@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramenta de Análise SWOT</title>
+    <style>
+        /* --- ESTILOS GERAIS (CSS) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        p.desc {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        /* Container da Grade SWOT */
+        .swot-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Estilo de cada cartão (quadrante) */
+        .swot-card {
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .swot-card h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            padding-bottom: 10px;
+        }
+
+        /* Cores Específicas para cada área */
+        .strengths { background-color: #d4edda; border-left: 5px solid #28a745; } /* Forças - Verde */
+        .weaknesses { background-color: #f8d7da; border-left: 5px solid #dc3545; } /* Fraquezas - Vermelho */
+        .opportunities { background-color: #d1ecf1; border-left: 5px solid #17a2b8; } /* Oportunidades - Azul */
+        .threats { background-color: #fff3cd; border-left: 5px solid #ffc107; } /* Ameaças - Amarelo */
+
+        /* Área de Texto Editável */
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.5);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            background: #fff;
+            border-color: #666;
+        }
+
+        /* Botões de Ação */
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px; /* Ajustado para telas pequenas */
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #34495e;
+        }
+
+        /* Estilo específico para o botão de Limpar (Vermelho) */
+        .btn-clear {
+            background-color: #c0392b;
+        }
+        .btn-clear:hover {
+            background-color: #e74c3c;
+        }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            .swot-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- REGRAS DE IMPRESSÃO/PDF --- */
+        @media print {
+            body { background-color: white; }
+            .controls { display: none; }
+            textarea { border: none; resize: none; background: transparent; }
+            .swot-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Matriz SWOT Interativa</h1>
+    <p class="desc">Preencha os campos abaixo para planejar sua estratégia.</p>
+
+    <div class="swot-container">
+        
+        <div class="swot-card strengths">
+            <h2>Strengths (Forças)</h2>
+            <textarea id="txt-s" placeholder="Quais são os pontos fortes da empresa? O que fazemos bem?"></textarea>
+        </div>
+
+        <div class="swot-card weaknesses">
+            <h2>Weaknesses (Fraquezas)</h2>
+            <textarea id="txt-w" placeholder="O que precisa ser melhorado? Onde faltam recursos?"></textarea>
+        </div>
+
+        <div class="swot-card opportunities">
+            <h2>Opportunities (Oportunidades)</h2>
+            <textarea id="txt-o" placeholder="Quais tendências de mercado podemos aproveitar?"></textarea>
+        </div>
+
+        <div class="swot-card threats">
+            <h2>Threats (Ameaças)</h2>
+            <textarea id="txt-t" placeholder="O que a concorrência está fazendo? Existem obstáculos regulatórios?"></textarea>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button onclick="baixarTexto()">📥 Baixar Texto</button>
+        <button onclick="window.print()">🖨️ Salvar PDF</button>
+        <button class="btn-clear" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+    </div>
+
+    <script>
+        // --- LÓGICA JAVASCRIPT ---
+
+        function getDataFormatada() {
+            const data = new Date();
+            return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR');
+        }
+
+        function baixarTexto() {
+            const s = document.getElementById('txt-s').value;
+            const w = document.getElementById('txt-w').value;
+            const o = document.getElementById('txt-o').value;
+            const t = document.getElementById('txt-t').value;
+
+            const conteudo = `RELATÓRIO DE ANÁLISE SWOT
+Gerado em: ${getDataFormatada()}
+----------------------------------------
+[STRENGTHS - FORÇAS]
+${s || "(Nenhum item inserido)"}
+----------------------------------------
+[WEAKNESSES - FRAQUEZAS]
+${w || "(Nenhum item inserido)"}
+----------------------------------------
+[OPPORTUNITIES - OPORTUNIDADES]
+${o || "(Nenhum item inserido)"}
+----------------------------------------
+[THREATS - AMEAÇAS]
+${t || "(Nenhum item inserido)"}
+----------------------------------------
+            `;
+
+            const blob = new window.Blob([conteudo], { type: 'text/plain' });
+            const ancora = document.createElement('a');
+            ancora.href = window.URL.createObjectURL(blob);
+            ancora.download = 'Analise_SWOT.txt';
+            ancora.click();
+            window.URL.revokeObjectURL(ancora.href);
+        }
+
+        // Função para Limpar Tudo
+        function limparTudo() {
+            // Exibe uma janela de confirmação
+            if (confirm("Tem certeza que deseja apagar todo o conteúdo? Esta ação não pode ser desfeita.")) {
+                // Se o usuário clicar em "OK", limpa os campos
+                document.getElementById('txt-s').value = "";
+                document.getElementById('txt-w').value = "";
+                document.getElementById('txt-o').value = "";
+                document.getElementById('txt-t').value = "";
+            }
+        }
+    </script>
+</body>
+</html>
