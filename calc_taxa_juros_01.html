@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calc Taxa Juros — Projeto</title>
+    <meta name="description" content="Calculadora de taxa de juros — base HTML" />
+    <link rel="icon" href="favicon.ico" />
+    <!-- Link externo de estilos (crie styles.css) -->
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* Pequeno reset e layout base */
+        :root{--bg:#f9f9fb;--fg:#111;--accent:#0066cc}
+        *{box-sizing:border-box}
+        html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+        body{background:var(--bg);color:var(--fg);display:flex;flex-direction:column}
+        main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem}
+        .container{max-width:900px;width:100%}
+    </style>
+</head>
+<body>
+    <header>
+        <nav aria-label="Principal">
+            <a href="./" style="text-decoration:none;color:var(--accent);font-weight:600">Calc Taxa Juros</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container" id="app" role="main" aria-labelledby="app-title">
+            <h1 id="app-title">Calculadora de Taxa de Juros</h1>
+            <!-- Área principal: substitua pelo seu conteúdo -->
+            <p>Comece aqui: crie um formulário, uma tabela ou componentes interativos.</p>
+        </div>
+    </main>
+
+    <footer style="padding:1rem;text-align:center;font-size:.9rem">
+        &copy; 2025 — Projeto pessoal
+    </footer>
+
+    <!-- Script principal (crie script.js) -->
+    <script defer src="script.js"></script>
+</body>
+</html>

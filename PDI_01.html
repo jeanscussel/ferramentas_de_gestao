@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDI - Plano de Desenvolvimento Individual</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           CONFIGURAÇÕES GERAIS E VARIÁVEIS
+           ========================================= */
+        :root {
+            /* --- PERSONALIZE AQUI A COR DA MARCA --- */
+            --primary-color: #0056b3; /* Azul Corporativo */
+            --primary-hover: #004494;
+            
+            --secondary-color: #6c757d; /* Cinza Neutro */
+            --background-body: #f4f6f9;
+            --background-card: #ffffff;
+            --text-color: #333333;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-body);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           LAYOUT & CONTAINER
+           ========================================= */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: var(--background-card);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+
+        header p { color: var(--secondary-color); margin-top: 5px; }
+
+        /* --- PERSONALIZE AQUI O LOGO (URL) --- */
+        .logo-placeholder {
+            max-height: 60px;
+            margin-bottom: 10px;
+            /* Exemplo de como colocar imagem: content: url('https://sua-empresa.com/logo.png'); */
+        }
+
+        /* =========================================
+           WIZARD (NAVEGAÇÃO POR PASSOS)
+           ========================================= */
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .wizard-nav::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e9ecef;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        .step-indicator {
+            position: relative;
+            z-index: 1;
+            background: #e9ecef;
+            color: #6c757d;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #fff;
+        }
+
+        .step-indicator.active {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,86,179,0.4);
+        }
+
+        .step-indicator.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .step-label {
+            position: absolute;
+            top: 45px;
+            width: 120px;
+            text-align: center;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        /* =========================================
+           CONTEÚDO DOS PASSOS (FORMS)
+           ========================================= */
+        .step-content {
+            display: none; /* Oculta todos por padrão */
+            animation: fadeIn 0.5s;
+            flex-grow: 1;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        input[type="text"], input[type="date"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            background-color: #fdfdfd;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,86,179,0.1);
+        }
+
+        textarea { min-height: 120px; resize: vertical; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Slider de Prontidão */
+        .range-container { text-align: center; padding: 20px; background: #f8f9fa; border-radius: var(--radius); }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        .range-value { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-top: 10px; display: block; }
+
+        /* =========================================
+           TABELA DINÂMICA (PLANO DE AÇÃO)
+           ========================================= */
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .action-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .action-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .action-table input, .action-table select {
+            border: 1px solid #ced4da;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .btn-delete {
+            background: #fff;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .btn-delete:hover { background: var(--danger-color); color: #fff; }
+
+        .btn-add-row {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-add-row:hover { background: #218838; }
+
+        /* =========================================
+           BOTÕES DE NAVEGAÇÃO DO FOOTER
+           ========================================= */
+        .footer-nav {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 15px;
+        }
+
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        
+        .btn-secondary { background: var(--secondary-color); color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        .btn-outline { background: transparent; border: 1px solid var(--secondary-color); color: var(--secondary-color); }
+        .btn-print { background: #17a2b8; color: white; margin-left: 10px; }
+        .btn-reset { background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 12px; padding: 8px 15px; }
+
+        /* Checkbox customizado */
+        .agreement-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: var(--radius);
+            border-left: 5px solid var(--primary-color);
+            margin-top: 20px;
+        }
+
+        /* Área de Assinatura (Escondida na tela) */
+        .signature-section { display: none; }
+
+        /* =========================================
+           MÓDULO DE IMPRESSÃO (CRÍTICO)
+           ========================================= */
+        @media print {
+            @page { size: A4; margin: 1.5cm; }
+            
+            body { background: white; color: black; -webkit-print-color-adjust: exact; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; margin: 0; padding: 0; min-height: auto; }
+            
+            /* Esconder elementos de UI */
+            .wizard-nav, .footer-nav, .btn-add-row, .btn-delete, .btn, .range-container { display: none !important; }
+            
+            /* Mostrar todos os passos */
+            .step-content { display: block !important; margin-bottom: 30px; border-bottom: 1px solid #000; padding-bottom: 20px; opacity: 1; animation: none; }
+            
+            /* Transformar Inputs em "Texto" */
+            input, textarea, select {
+                border: none;
+                background: transparent;
+                resize: none;
+                padding: 0;
+                width: 100%;
+                font-family: 'Times New Roman', serif; /* Fonte mais formal para o papel */
+                font-size: 12pt;
+                color: black;
+            }
+            
+            /* Adicionar linhas onde havia inputs para dar cara de documento */
+            .form-group { margin-bottom: 10px; }
+            label { font-weight: bold; font-size: 10pt; text-transform: uppercase; color: #000; margin-bottom: 2px; }
+            
+            /* Estilo específico para valores preenchidos */
+            input[type="text"], textarea { border-bottom: 1px dotted #999; min-height: auto; }
+            
+            /* Header de Impressão */
+            header { border-bottom: 2px solid #000; margin-bottom: 20px; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+            header h1 { font-size: 18pt; color: black; }
+            
+            /* Tabela de Impressão */
+            .action-table th { background: #ddd !important; color: black; border: 1px solid #000; font-weight: bold; }
+            .action-table td { border: 1px solid #000; }
+            .action-table input, .action-table select { border: none; font-size: 10pt; }
+
+            /* Visualização do Nível de Prontidão no Papel */
+            .print-readiness { display: block; margin-top: 5px; font-weight: bold; }
+            
+            /* Rodapé com Assinaturas */
+            .signature-section {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 50px;
+                page-break-inside: avoid;
+            }
+            .sign-box {
+                width: 45%;
+                border-top: 1px solid #000;
+                text-align: center;
+                padding-top: 10px;
+                font-size: 12px;
+            }
+
+            /* Esconder placeholder do logo se não tiver imagem */
+            .logo-placeholder { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-placeholder">COOPERATIVA DE CRÉDITO</div>
+        <h1>Plano de Desenvolvimento Individual (PDI)</h1>
+        <p>Ferramenta de Gestão de Desempenho</p>
+    </header>
+
+    <div class="wizard-nav">
+        <div class="step-indicator active" onclick="goToStep(1)">1<span class="step-label">Dados</span></div>
+        <div class="step-indicator" onclick="goToStep(2)">2<span class="step-label">Diagnóstico</span></div>
+        <div class="step-indicator" onclick="goToStep(3)">3<span class="step-label">Objetivos</span></div>
+        <div class="step-indicator" onclick="goToStep(4)">4<span class="step-label">Plano de Ação</span></div>
+        <div class="step-indicator" onclick="goToStep(5)">5<span class="step-label">Acordo</span></div>
+    </div>
+
+    <div id="step1" class="step-content active">
+        <h2>Dados do Colaborador</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Nome do Colaborador:</label>
+                <input type="text" id="colaborador" placeholder="Nome completo">
+            </div>
+            <div class="form-group">
+                <label>Nome do Gestor:</label>
+                <input type="text" id="gestor" placeholder="Nome do gestor imediato">
+            </div>
+            <div class="form-group">
+                <label>Área / Setor:</label>
+                <input type="text" id="area" placeholder="Ex: Crédito, Comercial, TI">
+            </div>
+            <div class="form-group">
+                <label>Ciclo de Avaliação:</label>
+                <input type="text" id="ciclo" placeholder="Ex: 2025/1">
+            </div>
+        </div>
+    </div>
+
+    <div id="step2" class="step-content">
+        <h2>Diagnóstico Atual</h2>
+        <div class="form-group">
+            <label>Pontos Fortes (O que manter):</label>
+            <textarea id="pontosFortes" placeholder="Descreva as principais competências e habilidades já demonstradas..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Pontos a Desenvolver (O que melhorar):</label>
+            <textarea id="pontosMelhorar" placeholder="Descreva gaps de competência, técnicos ou comportamentais..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Nível de Prontidão Atual (Autoavaliação):</label>
+            <div class="range-container">
+                <input type="range" id="prontidao" min="1" max="5" value="3" oninput="updateRangeValue(this.value)">
+                <span class="range-value" id="prontidaoDisplay">Nível 3 - Competente</span>
+                <small style="color: #666; display: block; margin-top: 5px;">1: Iniciante | 5: Expert/Referência</small>
+            </div>
+            <div class="print-readiness" style="display:none" id="printProntidao">Nível: 3</div>
+        </div>
+    </div>
+
+    <div id="step3" class="step-content">
+        <h2>Definição de Objetivos</h2>
+        <div class="form-group">
+            <label>Objetivo Profissional de Curto Prazo (6 meses):</label>
+            <textarea id="objCurto" style="height: 80px" placeholder="Onde você quer chegar no próximo semestre?"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Objetivo Profissional de Médio Prazo (1-2 anos):</label>
+            <textarea id="objMedio" style="height: 80px" placeholder="Qual o próximo grande passo na carreira?"></textarea>
+        </div>
+    </div>
+
+    <div id="step4" class="step-content">
+        <h2>Plano de Ação (70/20/10)</h2>
+        <p style="font-size: 0.9rem; color: #666;">Defina ações concretas. Misture aprendizado prático (70%), trocas/mentoria (20%) e cursos/estudos (10%).</p>
+        
+        <table class="action-table" id="acaoTable">
+            <thead>
+                <tr>
+                    <th style="width: 30%">O que fazer (Ação)</th>
+                    <th style="width: 25%">Como (Recurso)</th>
+                    <th style="width: 15%">Início</th>
+                    <th style="width: 15%">Fim</th>
+                    <th style="width: 10%">Status</th>
+                    <th style="width: 5%"></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+        <button class="btn-add-row" onclick="addTableRow()">+ Adicionar Ação</button>
+    </div>
+
+    <div id="step5" class="step-content">
+        <h2>Acordo e Validação</h2>
+        <div class="form-group">
+            <label>Comentários Finais do Gestor:</label>
+            <textarea id="comentariosGestor" placeholder="Espaço reservado para o gestor..."></textarea>
+        </div>
+
+        <div class="agreement-box">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="acordoCheck" style="width: 20px; height: 20px; margin-right: 10px;">
+                Estou de acordo com este Plano de Desenvolvimento Individual e comprometo-me a executá-lo.
+            </label>
+        </div>
+    </div>
+
+    <div class="signature-section">
+        <div class="sign-box">
+            Assinatura do Colaborador
+            <br><br><br>
+            ____________________________________
+        </div>
+        <div class="sign-box">
+            Assinatura do Gestor
+            <br><br><br>
+            ____________________________________
+        </div>
+    </div>
+
+    <div class="footer-nav">
+        <div>
+            <button class="btn btn-reset" onclick="clearData()">Limpar Dados</button>
+        </div>
+        <div>
+            <button class="btn btn-outline" id="btnPrev" onclick="prevStep()" style="display: none;">Voltar</button>
+            <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Próximo</button>
+            <button class="btn btn-print" id="btnPrint" onclick="window.print()" style="display: none;">Gerar PDF / Imprimir</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* =========================================
+       LÓGICA DA APLICAÇÃO (JAVASCRIPT PURO)
+       ========================================= */
+    
+    let currentStep = 1;
+    const totalSteps = 5;
+    const storageKey = 'pdi_cooperativa_data_v1';
+
+    // Estrutura de dados inicial
+    let pdiData = {
+        colaborador: '', gestor: '', area: '', ciclo: '',
+        pontosFortes: '', pontosMelhorar: '', prontidao: '3',
+        objCurto: '', objMedio: '',
+        acoes: [], // Array de objetos para a tabela
+        comentariosGestor: '', acordoCheck: false
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        renderStep();
+        setupAutoSave();
+    });
+
+    // --- NAVEGAÇÃO WIZARD ---
+    function renderStep() {
+        // Esconder todos
+        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.step-indicator').forEach(el => el.classList.remove('active', 'completed'));
+
+        // Mostrar atual
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        
+        // Atualizar bolinhas
+        for(let i = 1; i <= totalSteps; i++) {
+            const el = document.querySelector(`.wizard-nav .step-indicator:nth-child(${i})`);
+            if (i === currentStep) el.classList.add('active');
+            if (i < currentStep) el.classList.add('completed');
+        }
+
+        // Botões
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        const btnPrint = document.getElementById('btnPrint');
+
+        btnPrev.style.display = currentStep === 1 ? 'none' : 'inline-block';
+        
+        if (currentStep === totalSteps) {
+            btnNext.style.display = 'none';
+            btnPrint.style.display = 'inline-block';
+        } else {
+            btnNext.style.display = 'inline-block';
+            btnNext.textContent = 'Próximo';
+            btnPrint.style.display = 'none';
+        }
+    }
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            renderStep();
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            renderStep();
+        }
+    }
+
+    function goToStep(step) {
+        currentStep = step;
+        renderStep();
+    }
+
+    // --- TABELA DINÂMICA ---
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        if (pdiData.acoes.length === 0) {
+            // Adiciona uma linha vazia se não houver nada
+            pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'});
+        }
+
+        pdiData.acoes.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" value="${row.acao}" oninput="updateRow(${index}, 'acao', this.value)" placeholder="Descreva a ação"></td>
+                <td><input type="text" value="${row.recurso}" oninput="updateRow(${index}, 'recurso', this.value)" placeholder="O que precisa?"></td>
+                <td><input type="date" value="${row.inicio}" oninput="updateRow(${index}, 'inicio', this.value)"></td>
+                <td><input type="date" value="${row.fim}" oninput="updateRow(${index}, 'fim', this.value)"></td>
+                <td>
+                    <select onchange="updateRow(${index}, 'status', this.value)">
+                        <option value="NaoIniciado" ${row.status === 'NaoIniciado' ? 'selected' : ''}>A Iniciar</option>
+                        <option value="EmAndamento" ${row.status === 'EmAndamento' ? 'selected' : ''}>Em Andamento</option>
+                        <option value="Concluido" ${row.status === 'Concluido' ? 'selected' : ''}>Concluído</option>
+                    </select>
+                </td>
+                <td style="text-align:center">
+                    <button class="btn-delete" onclick="deleteRow(${index})" title="Excluir">X</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addTableRow() {
+        pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'});
+        renderTable();
+        saveData();
+    }
+
+    function updateRow(index, field, value) {
+        pdiData.acoes[index][field] = value;
+        saveData();
+    }
+
+    function deleteRow(index) {
+        if(confirm("Tem certeza que deseja excluir esta linha?")) {
+            pdiData.acoes.splice(index, 1);
+            renderTable();
+            saveData();
+        }
+    }
+
+    // --- PERSISTÊNCIA E FORMULÁRIO ---
+    
+    // Slider UI update
+    window.updateRangeValue = function(val) {
+        const labels = ["1 - Iniciante", "2 - Em Desenvolvimento", "3 - Competente", "4 - Avançado", "5 - Expert/Referência"];
+        document.getElementById('prontidaoDisplay').textContent = `Nível ${val} - ${labels[val-1] || ''}`;
+        document.getElementById('printProntidao').textContent = `Nível Selecionado: ${val} (${labels[val-1] || ''})`;
+        
+        // Atualiza o dado
+        pdiData.prontidao = val;
+        saveData();
+    }
+
+    function setupAutoSave() {
+        // Campos simples de texto
+        const simpleFields = ['colaborador', 'gestor', 'area', 'ciclo', 'pontosFortes', 'pontosMelhorar', 'objCurto', 'objMedio', 'comentariosGestor'];
+        
+        simpleFields.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('input', (e) => {
+                    pdiData[id] = e.target.value;
+                    saveData();
+                });
+            }
+        });
+
+        // Checkbox
+        document.getElementById('acordoCheck').addEventListener('change', (e) => {
+            pdiData.acordoCheck = e.target.checked;
+            saveData();
+        });
+    }
+
+    function saveData() {
+        localStorage.setItem(storageKey, JSON.stringify(pdiData));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            pdiData = JSON.parse(saved);
+            
+            // Repopular campos simples
+            Object.keys(pdiData).forEach(key => {
+                if (key === 'acoes') return; // Tratado separado
+                
+                const el = document.getElementById(key);
+                if (el) {
+                    if (key === 'acordoCheck') {
+                        el.checked = pdiData[key];
+                    } else if (key === 'prontidao') {
+                        el.value = pdiData[key];
+                        updateRangeValue(pdiData[key]);
+                    } else {
+                        el.value = pdiData[key];
+                    }
+                }
+            });
+        }
+        // Sempre renderizar tabela, mesmo vazia (ou com dados salvos)
+        renderTable();
+    }
+
+    function clearData() {
+        if(confirm("Isso apagará todos os dados preenchidos. Deseja continuar?")) {
+            localStorage.removeItem(storageKey);
+            location.reload();
+        }
+    }
+</script>
+
+</body>
+</html>
