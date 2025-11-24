@@ -1,43 +1,537 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Calc Taxa Juros — Projeto</title>
-    <meta name="description" content="Calculadora de taxa de juros — base HTML" />
-    <link rel="icon" href="favicon.ico" />
-    <!-- Link externo de estilos (crie styles.css) -->
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Taxa - Cooperativa</title>
     <style>
-        /* Pequeno reset e layout base */
-        :root{--bg:#f9f9fb;--fg:#111;--accent:#0066cc}
-        *{box-sizing:border-box}
-        html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-        body{background:var(--bg);color:var(--fg);display:flex;flex-direction:column}
-        main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem}
-        .container{max-width:900px;width:100%}
+        /* DESIGN SYSTEM - CORPORATE BANKING */
+        :root {
+            --primary-color: #003366; /* Azul Marinho Institucional */
+            --secondary-color: #005b96;
+            --accent-color: #e0e0e0;
+            --text-dark: #333333;
+            --text-light: #ffffff;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --bg-page: #f4f7f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            background-color: #f0f4f8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* GRID LAYOUT */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            background: #fafafa;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-item input {
+            margin-right: 8px;
+            width: auto;
+        }
+
+        /* RESULT BOX STYLES */
+        .result-panel {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-top: 30px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .result-item small {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .result-item .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .discount-tag {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <nav aria-label="Principal">
-            <a href="./" style="text-decoration:none;color:var(--accent);font-weight:600">Calc Taxa Juros</a>
-        </nav>
-    </header>
 
-    <main>
-        <div class="container" id="app" role="main" aria-labelledby="app-title">
-            <h1 id="app-title">Calculadora de Taxa de Juros</h1>
-            <!-- Área principal: substitua pelo seu conteúdo -->
-            <p>Comece aqui: crie um formulário, uma tabela ou componentes interativos.</p>
+<div class="container">
+    <h1>Calculadora de Taxa Personalizada</h1>
+
+    <h2>1. Dados da Proposta</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label for="modelo">Modelo de Crédito</label>
+            <select id="modelo" onchange="calcular()">
+                <option value="12">Modelo 12 (2,20% a.m)</option>
+                <option value="20">Modelo 20 (4,00% a.m)</option>
+                <option value="3614">Modelo 3614 (18,00% a.a)</option>
+                <option value="3616">Modelo 3616 (14,00% a.a)</option>
+                <option value="3618">Modelo 3618 (3,00% a.m)</option>
+                <option value="28">Modelo 28 (4,00% a.m)</option>
+                <option value="25">Modelo 25 (5,00% a.m)</option>
+                <option value="3620">Modelo 3620 (4,00% a.m)</option>
+            </select>
         </div>
-    </main>
+        <div class="form-group">
+            <label for="valorProposta">Valor da Proposta (R$)</label>
+            <input type="text" id="valorProposta" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+        <div class="form-group">
+            <label for="prazoMeses">Prazo (Meses)</label>
+            <input type="number" id="prazoMeses" value="12" onchange="calcular()">
+        </div>
+        <div class="form-group">
+            <label for="modalidade">Modalidade</label>
+            <select id="modalidade" onchange="calcular()">
+                <option value="Urbano">Urbano</option>
+                <option value="Rural">Rural</option>
+                <option value="PJ">Pessoa Jurídica</option>
+            </select>
+        </div>
+    </div>
 
-    <footer style="padding:1rem;text-align:center;font-size:.9rem">
-        &copy; 2025 — Projeto pessoal
-    </footer>
+    <h2>2. Informações Financeiras (Conglomerado/Sócio)</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label for="rendaMensal">Renda Mensal</label>
+            <input type="text" id="rendaMensal" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+        <div class="form-group">
+            <label for="patrimonio">Patrimônio</label>
+            <input type="text" id="patrimonio" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+        <div class="form-group">
+            <label for="capital">Capital (Sócio)</label>
+            <input type="text" id="capital" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+    </div>
+    <div class="grid">
+        <div class="form-group">
+            <label for="endividamentoCoop">Endividamento (Na Cooperativa)</label>
+            <input type="text" id="endividamentoCoop" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+        <div class="form-group">
+            <label for="endividamentoSCR">Endividamento SCR (1 ano)</label>
+            <input type="text" id="endividamentoSCR" placeholder="0,00" onkeyup="mascaraMoeda(this); calcular()">
+        </div>
+        <div class="form-group">
+            <label for="dataAssociacao">Data de Associação</label>
+            <input type="date" id="dataAssociacao" onchange="calcular()">
+        </div>
+    </div>
 
-    <!-- Script principal (crie script.js) -->
-    <script defer src="script.js"></script>
+    <h2>3. Variáveis de Relacionamento e Risco</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label>Produtos e Serviços</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Cartão</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Internet Banking</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Seguro</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Consórcio</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Aplicação</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Empréstimo</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Boleto</div>
+                <div class="checkbox-item"><input type="checkbox" class="prod-check" onchange="calcular()"> Limite Conta</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="riscoSocio">Risco do Sócio</label>
+            <select id="riscoSocio" onchange="calcular()">
+                <option value="AA">AA</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="riscoOperacao">Risco da Operação</label>
+            <select id="riscoOperacao" onchange="calcular()">
+                <option value="AA">AA</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="recebimento">Recebimento (Salário/Receita)</label>
+            <select id="recebimento" onchange="calcular()">
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="result-panel">
+        <div class="result-grid">
+            <div class="result-item">
+                <small>Taxa Base (Mês)</small>
+                <span class="value" id="outTaxaPadrao">0,00%</span>
+            </div>
+            <div class="result-item">
+                <small>Total de Descontos</small>
+                <span class="value" id="outTotalDescontos">0,00%</span>
+            </div>
+            <div class="result-item" style="border-left: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.3);">
+                <small>Taxa Final (Mês)</small>
+                <span class="value" id="outTaxaFinalMes">0,00%</span>
+            </div>
+            <div class="result-item">
+                <small>Taxa Final (Ano)</small>
+                <span class="value" id="outTaxaFinalAno">0,00%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-info" id="detalhesDescontos">
+        </div>
+
+</div>
+
+<script>
+    // --- DADOS FIXOS (TABELAS) ---
+    const MODELOS = {
+        "12": { taxa: 0.0220, anual: false },
+        "20": { taxa: 0.0400, anual: false },
+        "3614": { taxa: 0.1800, anual: true },
+        "3616": { taxa: 0.1400, anual: true },
+        "3618": { taxa: 0.0300, anual: false },
+        "28": { taxa: 0.0400, anual: false },
+        "25": { taxa: 0.0500, anual: false },
+        "3620": { taxa: 0.0400, anual: false }
+    };
+
+    // Tabela: Limite Inferior -> Valor de Desconto
+    const TABELA_CAPITAL_ENDIVIDAMENTO = [
+        { min: 0, val: 0.10 },
+        { min: 0.05, val: 0.07 },
+        { min: 0.10, val: 0.035 },
+        { min: 0.21, val: 0.00 }
+    ];
+
+    const TABELA_ENDIVIDAMENTO_PATRIMONIO = [
+        { min: 0, val: 0.07 },
+        { min: 0.2, val: 0.045 },
+        { min: 0.4, val: 0.03 },
+        { min: 0.6, val: 0.015 },
+        { min: 1.0, val: 0.00 }
+    ];
+
+    const TABELA_PRODUTOS = [
+        { min: 0, val: 0.00 },
+        { min: 1, val: 0.0125 },
+        { min: 2, val: 0.0250 },
+        { min: 3, val: 0.0375 },
+        { min: 4, val: 0.0500 }
+    ];
+
+    const TABELA_TEMPO_ASSOC = [
+        { min: 0, val: 0.00 },
+        { min: 1, val: 0.015 },
+        { min: 5, val: 0.030 },
+        { min: 10, val: 0.050 }
+    ];
+
+    const TABELA_PRAZO_OP = [
+        { min: 0, val: 0.04 },
+        { min: 13, val: 0.03 },
+        { min: 25, val: 0.02 },
+        { min: 37, val: 0.01 },
+        { min: 49, val: 0.00 }
+    ];
+
+    const TABELA_ENDIV_RENDA_URBANO = [
+        { min: 0, val: 0.07 },
+        { min: 0.1, val: 0.04 },
+        { min: 0.2, val: 0.02 },
+        { min: 0.3, val: 0.00 }
+    ];
+
+    const TABELA_PRONAF_RURAL = [
+        { min: 0, val: 0.07 },
+        { min: 0.3, val: 0.04 },
+        { min: 0.5, val: 0.02 },
+        { min: 0.7, val: 0.00 }
+    ];
+
+    // --- FUNÇÕES UTILITÁRIAS ---
+
+    // Formata input monetário
+    function mascaraMoeda(i) {
+        var v = i.value.replace(/\D/g,'');
+        v = (v/100).toFixed(2) + '';
+        v = v.replace(".", ",");
+        v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        i.value = v;
+    }
+
+    // Converte string formatada (1.000,00) para float JS
+    function parseCurrency(str) {
+        if (!str) return 0;
+        return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
+    // Função "PROCV" (Busca aproximada - Verdadeiro)
+    // Assume que a tabela está ordenada pelo 'min'
+    function procvAproximado(valor, tabela) {
+        let resultado = 0;
+        for (let i = 0; i < tabela.length; i++) {
+            if (valor >= tabela[i].min) {
+                resultado = tabela[i].val;
+            } else {
+                break; // Se o valor é menor que o próximo degrau, paramos
+            }
+        }
+        return resultado;
+    }
+
+    // Função de Risco (Texto para Valor)
+    function getDescontoRisco(letra) {
+        const tabela = {
+            "AA": 0.05, "A": 0.05, "B": 0.05,
+            "C": 0.02,
+            "D": 0, "E": 0, "F": 0, "G": 0, "H": 0
+        };
+        return tabela[letra] || 0;
+    }
+
+    // --- LÓGICA PRINCIPAL ---
+
+    function calcular() {
+        // 1. Inputs Numéricos
+        const valorProposta = parseCurrency(document.getElementById('valorProposta').value);
+        const rendaMensal = parseCurrency(document.getElementById('rendaMensal').value);
+        const patrimonio = parseCurrency(document.getElementById('patrimonio').value);
+        const capital = parseCurrency(document.getElementById('capital').value);
+        const endividamentoCoop = parseCurrency(document.getElementById('endividamentoCoop').value);
+        const endividamentoSCR = parseCurrency(document.getElementById('endividamentoSCR').value); // SCR 1 ano
+        const prazoMeses = parseInt(document.getElementById('prazoMeses').value) || 0;
+
+        // 2. Taxa Padrão do Modelo
+        const modeloId = document.getElementById('modelo').value;
+        const modeloDados = MODELOS[modeloId];
+        let taxaPadraoMes = 0;
+
+        if (modeloDados.anual) {
+            // Converte Anual para Mensal: (1+Tx)^(1/12) - 1
+            taxaPadraoMes = Math.pow((1 + modeloDados.taxa), (1/12)) - 1;
+        } else {
+            taxaPadraoMes = modeloDados.taxa;
+        }
+
+        // 3. Cálculo dos Descontos
+        let descontos = {};
+
+        // A) Capital x Endividamento (B30 + B14) / G27
+        // (Capital + Proposta) / SCR 1 Ano
+        let ratioCapEndiv = 0;
+        if (endividamentoSCR > 0) {
+            ratioCapEndiv = (capital + valorProposta) / endividamentoSCR;
+        } else {
+            ratioCapEndiv = 999; // Se dívida é 0, ratio é infinito (máximo desconto se houver capital)
+        }
+        descontos['Capital/Endiv'] = procvAproximado(ratioCapEndiv, TABELA_CAPITAL_ENDIVIDAMENTO);
+
+        // B) Endividamento x Patrimônio (B14 + B30) / E27
+        // (Proposta + Capital) / Patrimônio
+        let ratioEndivPat = 0;
+        if (patrimonio > 0) {
+            ratioEndivPat = (valorProposta + capital) / patrimonio;
+        } else {
+            ratioEndivPat = 999; // Sem patrimônio, risco alto
+        }
+        descontos['Endiv/Patr'] = procvAproximado(ratioEndivPat, TABELA_ENDIVIDAMENTO_PATRIMONIO);
+
+        // C) Produtos e Serviços
+        const checkboxes = document.querySelectorAll('.prod-check:checked');
+        descontos['Produtos'] = procvAproximado(checkboxes.length, TABELA_PRODUTOS);
+
+        // D) Risco Sócio
+        descontos['Risco Sócio'] = getDescontoRisco(document.getElementById('riscoSocio').value);
+
+        // E) Risco Operação
+        descontos['Risco Operação'] = getDescontoRisco(document.getElementById('riscoOperacao').value);
+
+        // F) Recebimento
+        descontos['Recebimento'] = document.getElementById('recebimento').value === 'sim' ? 0.02 : 0.00;
+
+        // G) Tempo de Associação
+        const dataAssoc = new Date(document.getElementById('dataAssociacao').value);
+        const hoje = new Date();
+        let anosAssoc = 0;
+        if (!isNaN(dataAssoc.getTime())) {
+            const diffTime = Math.abs(hoje - dataAssoc);
+            anosAssoc = diffTime / (1000 * 60 * 60 * 24 * 365); 
+        }
+        descontos['Tempo Assoc'] = procvAproximado(anosAssoc, TABELA_TEMPO_ASSOC);
+
+        // H) Prazo Operação
+        descontos['Prazo'] = procvAproximado(prazoMeses, TABELA_PRAZO_OP);
+
+        // I) Modalidade (Urbano/Rural) - Endividamento x Renda
+        // Formula: ((EndividamentoCoop / 12) + (ValorProposta / PrazoMeses)) / RendaMensal
+        let ratioCapacidade = 0;
+        if (rendaMensal > 0 && prazoMeses > 0) {
+            const parcelaDividaAntiga = endividamentoCoop / 12; // Conforme regra E30/12
+            const parcelaNova = valorProposta / prazoMeses;
+            ratioCapacidade = (parcelaDividaAntiga + parcelaNova) / rendaMensal;
+        }
+        
+        const modalidade = document.getElementById('modalidade').value;
+        if (modalidade === 'Urbano') {
+            descontos['Modalidade'] = procvAproximado(ratioCapacidade, TABELA_ENDIV_RENDA_URBANO);
+        } else {
+            // Rural e PJ
+            descontos['Modalidade'] = procvAproximado(ratioCapacidade, TABELA_PRONAF_RURAL);
+        }
+
+        // 4. Soma Total dos Descontos
+        let totalPercentualDesconto = 0;
+        let htmlDetalhes = "<strong>Detalhamento dos Descontos:</strong><br>";
+        
+        for (const [key, val] of Object.entries(descontos)) {
+            totalPercentualDesconto += val;
+            htmlDetalhes += `<span style="display:inline-block; margin-right:10px; font-size:0.9em">${key}: <span style="color:green">${(val*100).toFixed(2)}%</span></span> `;
+        }
+        
+        document.getElementById('detalhesDescontos').innerHTML = htmlDetalhes;
+
+        // 5. Taxa Final
+        // Formula fonte [84]: TaxaFinal = TaxaPadrao - (TaxaPadrao * SomaDescontos)
+        // Nota: Se SomaDescontos for 26.75% (0.2675), calculamos Padrao * (1 - 0.2675)
+        
+        let taxaFinalMes = taxaPadraoMes - (taxaPadraoMes * totalPercentualDesconto);
+        
+        // Trava de segurança: Taxa não pode ser negativa
+        if (taxaFinalMes < 0) taxaFinalMes = 0;
+
+        let taxaFinalAno = Math.pow((1 + taxaFinalMes), 12) - 1;
+
+        // 6. Renderização
+        document.getElementById('outTaxaPadrao').innerText = (taxaPadraoMes * 100).toFixed(2).replace('.', ',') + '%';
+        document.getElementById('outTotalDescontos').innerText = (totalPercentualDesconto * 100).toFixed(2).replace('.', ',') + '%';
+        document.getElementById('outTaxaFinalMes').innerText = (taxaFinalMes * 100).toFixed(2).replace('.', ',') + '%';
+        document.getElementById('outTaxaFinalAno').innerText = (taxaFinalAno * 100).toFixed(2).replace('.', ',') + '%';
+    }
+
+    // Inicializa com zeros
+    calcular();
+</script>
+
 </body>
 </html>
