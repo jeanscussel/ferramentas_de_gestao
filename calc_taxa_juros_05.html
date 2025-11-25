@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Taxa - Cooperativa (Calibrada)</title>
+    <title>Calculadora de Taxa - Cooperativa (V8 Print Fix)</title>
     <style>
         :root {
-            --primary: #003366;
-            --secondary: #005b96;
+            --primary: #007141;
+            --secondary: #67BD50;
+            --complement: #F58634;
             --bg: #f5f7fa;
             --text: #333;
             --border: #dde2e6;
@@ -19,7 +20,6 @@
             color: var(--text);
             margin: 0;
             padding: 20px;
-            -webkit-print-color-adjust: exact;
         }
 
         .container {
@@ -35,16 +35,29 @@
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             border-bottom: 2px solid var(--primary);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
             margin-bottom: 30px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-placeholder {
+            max-height: 50px;
+            width: auto;
+            display: block;
         }
 
         .header h1 {
             color: var(--primary);
             margin: 0;
             font-size: 1.6rem;
+            line-height: 1.2;
         }
 
         /* FORM SECTIONS */
@@ -96,12 +109,11 @@
 
         .rate-badge {
             display: inline-block;
-            background: #e3f2fd;
-            color: var(--secondary);
+            background: #ffffff;
+            color: var(--complement);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
-            font-weight: bold;
             margin-top: 5px;
         }
 
@@ -197,36 +209,25 @@
         }
         
         .btn:hover { background: var(--secondary); }
-
-        /* PRINT STYLES */
-        @media print {
-            body { background: white; padding: 0; font-size: 11px; }
-            .container { box-shadow: none; padding: 0; max-width: 100%; }
-            .actions, .no-print { display: none !important; }
-            .section-title { background: none; border-left: none; border-bottom: 1px solid #ccc; padding: 5px 0; margin-top: 20px; color: black; }
-            input, select { border: none; padding: 0; background: transparent; font-weight: bold; -webkit-appearance: none; }
-            .result-box { border: 1px solid #000; }
-            .result-header { background: #eee; color: black; border-bottom: 1px solid #000; }
-            .rate-badge { background: none; border: 1px solid #ccc; color: black; }
-            .checkbox-grid { border: none; padding: 0; display: block; }
-            .checkbox-item { display: inline-block; margin-right: 15px; }
-            .checkbox-item input { display: none; }
-            .checkbox-item input:checked + span::before { content: "[x] "; font-weight: bold; }
-            .checkbox-item input:not(:checked) + span::before { content: "[ ] "; }
-            .header h1 { font-size: 14pt; }
-        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="printableArea">
     <div class="header">
-        <div>
-            <h1>Simulação de Crédito</h1>
-            <span class="no-print" style="font-size:0.9rem; color:#666">Preencha os campos abaixo para calcular</span>
+        <div class="header-left">
+            <img src="https://github.com/jeanscussel/ferramentas_de_gestao/blob/main/logotipo.png?raw=true" 
+                 alt="Logo da Cooperativa" 
+                 class="logo-placeholder">
+            
+            <div>
+                <h1>Calculadora de Taxas</h1>
+                <span style="font-size:0.9rem; color:#666">Preencha os campos para calcular</span>
+            </div>
         </div>
         <div style="text-align: right; font-size: 0.8rem;">
-            Data: <span id="dataHoje"></span>
+            Data da Simulação:<br>
+            <strong id="dataHoje">--/--/----</strong>
         </div>
     </div>
 
@@ -234,11 +235,11 @@
     <div class="row">
         <div class="col">
             <label>Nome Completo</label>
-            <input type="text" id="nome" placeholder="Fulano de Tal">
+            <input type="text" id="nome" placeholder="Nome e sobrenome">
         </div>
         <div class="col">
             <label>CPF / CNPJ</label>
-            <input type="text" id="cpf" placeholder="000.000.000-00">
+            <input type="text" id="cpf" placeholder="CPF ou CNPJ" maxlength="18" oninput="mascaraCpfCnpj(this)">
         </div>
     </div>
     <div class="row">
@@ -248,7 +249,7 @@
         </div>
         <div class="col">
             <label>Data de Associação</label>
-            <input type="date" id="dataAssociacao" value="2021-01-01" onchange="calcular()">
+            <input type="date" id="dataAssociacao" onchange="calcular()">
         </div>
     </div>
 
@@ -259,8 +260,8 @@
             <select id="modelo" onchange="calcular()">
                 <option value="12">Modelo 12</option>
                 <option value="20">Modelo 20</option>
-                <option value="3614">Modelo 3614</option>
-                <option value="3616">Modelo 3616</option>
+                <option value="3614">Modelo 3614 (Anual)</option>
+                <option value="3616">Modelo 3616 (Anual)</option>
                 <option value="3618">Modelo 3618</option>
                 <option value="28">Modelo 28</option>
                 <option value="25">Modelo 25</option>
@@ -270,11 +271,11 @@
         </div>
         <div class="col">
             <label>Valor da Operação (R$)</label>
-            <input type="text" id="valorProposta" value="1.000,00" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="valorProposta" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
         <div class="col">
             <label>Prazo (Meses)</label>
-            <input type="number" id="prazoMeses" value="12" onchange="calcular()">
+            <input type="number" id="prazoMeses" value="0" onchange="calcular()">
         </div>
         <div class="col">
             <label>Modalidade</label>
@@ -290,29 +291,29 @@
     <div class="row">
         <div class="col">
             <label>Renda Mensal (Conglomerado)</label>
-            <input type="text" id="rendaMensal" value="10,00" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="rendaMensal" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
         <div class="col">
             <label>Patrimônio (Conglomerado)</label>
-            <input type="text" id="patrimonio" value="1.000,00" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="patrimonio" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
         <div class="col">
             <label>Capital (Sócio)</label>
-            <input type="text" id="capital" value="10,00" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="capital" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <label>Endividamento (Sócio)</label>
-            <input type="text" id="endividamentoCoop" value="100,00" onkeyup="mascaraMoeda(this); calcular()">
+            <label>Endividamento (Cooperativa)</label>
+            <input type="text" id="endividamentoCoop" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
         <div class="col">
             <label>Endividamento SCR (1 ano)</label>
-            <input type="text" id="endividamentoSCR" value="5,00" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="endividamentoSCR" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
         <div class="col">
             <label>SCR (Acima de 1 ano)</label>
-            <input type="text" id="endividamentoSCRAcima" value="0,50" onkeyup="mascaraMoeda(this); calcular()">
+            <input type="text" id="endividamentoSCRAcima" value="0,00" onkeyup="mascaraMoeda(this); calcular()">
         </div>
     </div>
 
@@ -321,14 +322,15 @@
         <div class="col" style="flex: 2;">
             <label>Produtos e Serviços (Selecione)</label>
             <div class="checkbox-grid">
-                <div class="checkbox-item"><label><input type="checkbox" class="prod-check" checked onchange="calcular()"> <span>Cartão</span></label></div>
-                <div class="checkbox-item"><label><input type="checkbox" class="prod-check" checked onchange="calcular()"> <span>Internet Banking</span></label></div>
+                <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Cartão</span></label></div>
+                <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Internet Banking</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Seguro</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Consórcio</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Aplicação</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Empréstimo</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Boleto</span></label></div>
                 <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Limite Conta</span></label></div>
+                <div class="checkbox-item"><label><input type="checkbox" class="prod-check" onchange="calcular()"> <span>Máquina de cartão</span></label></div>
             </div>
         </div>
     </div>
@@ -336,29 +338,30 @@
         <div class="col">
             <label>Risco do Sócio</label>
             <select id="riscoSocio" onchange="calcular()">
-                <option value="AA">AA (5%)</option>
-                <option value="A" selected>A (5%)</option>
-                <option value="B">B (5%)</option>
-                <option value="C">C (2%)</option>
-                <option value="D">D (0%)</option>
-                <option value="E">E (0%)</option>
-                <option value="F">F (0%)</option>
-                <option value="G">G (0%)</option>
-                <option value="H">H (0%)</option>
+                <option value="AA">AA</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
+                <option value="Sem risco">Sem risco</option>
             </select>
         </div>
         <div class="col">
             <label>Risco da Operação</label>
             <select id="riscoOperacao" onchange="calcular()">
-                <option value="AA">AA (5%)</option>
-                <option value="A" selected>A (5%)</option>
-                <option value="B">B (5%)</option>
-                <option value="C">C (2%)</option>
-                <option value="D">D (0%)</option>
-                <option value="E">E (0%)</option>
-                <option value="F">F (0%)</option>
-                <option value="G">G (0%)</option>
-                <option value="H">H (0%)</option>
+                <option value="AA">AA</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
             </select>
         </div>
         <div class="col">
@@ -395,7 +398,7 @@
     </div>
 
     <div class="actions">
-        <button class="btn" onclick="window.print()">
+        <button class="btn" onclick="gerarRelatorioPopup()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
             Imprimir Relatório
         </button>
@@ -404,7 +407,6 @@
 
 <script>
     // --- LÓGICA DE NEGÓCIO ---
-    
     const MODELOS = {
         "12": { taxa: 0.0220, anual: false },
         "20": { taxa: 0.0400, anual: false },
@@ -416,60 +418,31 @@
         "3620": { taxa: 0.0400, anual: false }
     };
 
-    // Tabelas de Referência (Ranges)
-    const TABELA_CAPITAL_ENDIVIDAMENTO = [
-        { min: 0, val: 0.10 },
-        { min: 0.05, val: 0.07 },
-        { min: 0.10, val: 0.035 },
-        { min: 0.21, val: 0.00 } // Acima de 21% zera o desconto
-    ];
-
-    const TABELA_ENDIVIDAMENTO_PATRIMONIO = [
-        { min: 0, val: 0.07 },
-        { min: 0.2, val: 0.045 },
-        { min: 0.4, val: 0.03 },
-        { min: 0.6, val: 0.015 },
-        { min: 1.0, val: 0.00 } // Acima de 100% zera o desconto
-    ];
-
-    const TABELA_PRODUTOS = [
-        { min: 0, val: 0.00 },
-        { min: 1, val: 0.0125 },
-        { min: 2, val: 0.0250 },
-        { min: 3, val: 0.0375 },
-        { min: 4, val: 0.0500 }
-    ];
-
-    const TABELA_TEMPO_ASSOC = [
-        { min: 0, val: 0.00 },
-        { min: 1, val: 0.015 },
-        { min: 5, val: 0.030 },
-        { min: 10, val: 0.050 }
-    ];
-
-    const TABELA_PRAZO_OP = [
-        { min: 0, val: 0.04 },
-        { min: 13, val: 0.03 },
-        { min: 25, val: 0.02 },
-        { min: 37, val: 0.01 },
-        { min: 49, val: 0.00 }
-    ];
-
-    const TABELA_ENDIV_RENDA_URBANO = [
-        { min: 0, val: 0.07 },
-        { min: 0.1, val: 0.04 },
-        { min: 0.2, val: 0.02 },
-        { min: 0.3, val: 0.00 }
-    ];
-
-    const TABELA_PRONAF_RURAL = [
-        { min: 0, val: 0.07 },
-        { min: 0.3, val: 0.04 },
-        { min: 0.5, val: 0.02 },
-        { min: 0.7, val: 0.00 }
-    ];
+    const TABELA_CAPITAL_ENDIVIDAMENTO = [{min:0,val:0.10},{min:0.05,val:0.07},{min:0.10,val:0.035},{min:0.21,val:0.00}];
+    const TABELA_ENDIVIDAMENTO_PATRIMONIO = [{min:0,val:0.07},{min:0.2,val:0.045},{min:0.4,val:0.03},{min:0.6,val:0.015},{min:1.0,val:0.00}];
+    const TABELA_PRODUTOS = [{min:0,val:0.00},{min:1,val:0.0125},{min:2,val:0.0250},{min:3,val:0.0375},{min:4,val:0.0500}];
+    const TABELA_TEMPO_ASSOC = [{min:0,val:0.00},{min:1,val:0.015},{min:5,val:0.030},{min:10,val:0.050}];
+    const TABELA_PRAZO_OP = [{min:0,val:0.04},{min:13,val:0.03},{min:25,val:0.02},{min:37,val:0.01},{min:49,val:0.00}];
+    const TABELA_ENDIV_RENDA_URBANO = [{min:0,val:0.07},{min:0.1,val:0.04},{min:0.2,val:0.02},{min:0.3,val:0.00}];
+    const TABELA_PRONAF_RURAL = [{min:0,val:0.07},{min:0.3,val:0.04},{min:0.5,val:0.02},{min:0.7,val:0.00}];
 
     // --- UTILS ---
+    function mascaraCpfCnpj(i) {
+        var v = i.value.replace(/\D/g, "");
+        if (v.length > 14) v = v.slice(0, 14);
+        if (v.length <= 11) { 
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        } else { 
+            v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+            v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+            v = v.replace(/(\d{4})(\d)/, "$1-$2");
+        }
+        i.value = v;
+    }
+
     function mascaraMoeda(i) {
         let v = i.value.replace(/\D/g,'');
         v = (v/100).toFixed(2) + '';
@@ -485,26 +458,15 @@
 
     function procvAproximado(valor, tabela) {
         let resultado = 0;
-        // Se valor for maior que o último range, pega o valor do último (que é 0% em casos de risco alto)
-        // A lógica percorre do menor pro maior.
-        // Ex: Valor 1.1 (110%).
-        // 0 -> aplica 7%
-        // ...
-        // 1.0 -> aplica 0%
-        // Se loop chega em 1.0 e 1.1 >= 1.0, resultado vira 0%.
-        
         for (let i = 0; i < tabela.length; i++) {
-            if (valor >= tabela[i].min) {
-                resultado = tabela[i].val;
-            } else {
-                break;
-            }
+            if (valor >= tabela[i].min) resultado = tabela[i].val;
+            else break;
         }
         return resultado;
     }
 
     function getDescontoRisco(letra) {
-        const tabela = { "AA": 0.05, "A": 0.05, "B": 0.05, "C": 0.02 };
+        const tabela = { "AA": 0.05, "A": 0.05, "B": 0.05, "C": 0.02, "Sem risco": 0.00 };
         return tabela[letra] || 0;
     }
 
@@ -512,23 +474,91 @@
         return (val * 100).toFixed(2).replace('.', ',') + '%';
     }
 
+    // --- FUNÇÃO DE IMPRESSÃO (NOVA) ---
+    function gerarRelatorioPopup() {
+        // 1. Clonar o container para pegar o HTML limpo
+        const container = document.querySelector('.container');
+        const clone = container.cloneNode(true);
+        
+        // 2. Transferir valores digitados (inputs não levam valor no clone automaticamente)
+        const origInputs = container.querySelectorAll('input, select');
+        const cloneInputs = clone.querySelectorAll('input, select');
+        
+        for (let i = 0; i < origInputs.length; i++) {
+            const elOrig = origInputs[i];
+            const elClone = cloneInputs[i];
+            
+            if (elOrig.tagName === 'SELECT') {
+                elClone.value = elOrig.value;
+                // Força o atributo selected para aparecer na impressão
+                const options = elClone.querySelectorAll('option');
+                options.forEach(opt => {
+                    if (opt.value == elOrig.value) opt.setAttribute('selected', 'true');
+                });
+            } else if (elOrig.type === 'checkbox' || elOrig.type === 'radio') {
+                if (elOrig.checked) elClone.setAttribute('checked', 'true');
+            } else {
+                elClone.setAttribute('value', elOrig.value);
+            }
+        }
+        
+        // 3. Remover o botão de imprimir do clone
+        const actions = clone.querySelector('.actions');
+        if (actions) actions.remove();
+
+        // 4. Montar o HTML da nova janela
+        const cssOriginal = document.querySelector('style').innerHTML;
+        const htmlContent = `
+            <html>
+            <head>
+                <title>Relatório de Crédito</title>
+                <style>
+                    ${cssOriginal}
+                    /* Força estilos de impressão */
+                    body { background: white; margin: 0; padding: 20px; }
+                    .container { box-shadow: none; padding: 0; max-width: 100%; border: none; }
+                    .actions, .no-print { display: none !important; }
+                    /* Remove bordas de inputs para parecer texto fixo */
+                    input, select { border: none !important; background: transparent !important; font-weight: bold; appearance: none; -webkit-appearance: none; padding: 0; color: #000; }
+                    /* Ajustes visuais */
+                    .section-title { color: #000; border-color: #666; background: #eee; }
+                    h1 { color: #000; }
+                </style>
+            </head>
+            <body>
+                ${clone.outerHTML}
+                <script>
+                    window.onload = function() {
+                        setTimeout(() => { window.print(); window.close(); }, 500);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        // 5. Abrir Popup
+        const printWin = window.open('', '_blank', 'width=900,height=800');
+        if (printWin) {
+            printWin.document.write(htmlContent);
+            printWin.document.close(); // Importante para o navegador terminar de carregar
+        } else {
+            alert('Por favor, permita popups para este site para gerar o relatório.');
+        }
+    }
+
     // --- CALCULA ---
     function calcular() {
         document.getElementById('dataHoje').innerText = new Date().toLocaleDateString('pt-BR');
 
-        // Inputs
         const modeloId = document.getElementById('modelo').value;
         const valorProposta = parseCurrency(document.getElementById('valorProposta').value);
         const prazoMeses = parseInt(document.getElementById('prazoMeses').value) || 0;
-        
         const rendaMensal = parseCurrency(document.getElementById('rendaMensal').value);
         const patrimonio = parseCurrency(document.getElementById('patrimonio').value);
         const capital = parseCurrency(document.getElementById('capital').value);
-        
         const endivSocio = parseCurrency(document.getElementById('endividamentoCoop').value);
         const endivSCR = parseCurrency(document.getElementById('endividamentoSCR').value);
         
-        // 1. Taxa Base
         const modeloDados = MODELOS[modeloId];
         let taxaBaseMes = 0;
         let taxaBaseAno = 0;
@@ -541,36 +571,26 @@
             taxaBaseAno = Math.pow((1 + modeloDados.taxa), 12) - 1;
         }
 
-        document.getElementById('taxaRef').innerText = 
-            `Ref: ${formatPercent(taxaBaseMes)} a.m. | ${formatPercent(taxaBaseAno)} a.a.`;
+        document.getElementById('taxaRef').innerText = `Ref: ${formatPercent(taxaBaseMes)} a.m. | ${formatPercent(taxaBaseAno)} a.a.`;
 
-        // 2. Cálculo dos Bônus (Descontos)
         let totalBonus = 0;
         let debug = [];
 
-        // A) Capital x Endividamento (SCR 1 ano)
-        // (Capital + Valor) / SCR 
-        // Ex: (10 + 1000) / 5 = 202 (20200%) -> >21% -> 0% desc
         let ratioCap = (endivSCR > 0) ? (capital + valorProposta) / endivSCR : 999;
         let descCap = procvAproximado(ratioCap, TABELA_CAPITAL_ENDIVIDAMENTO);
         totalBonus += descCap;
         debug.push(`Cap x Endiv: ${formatPercent(descCap)}`);
 
-        // B) Endividamento x Patrimônio
-        // Ajustado para dar 0% no caso teste (110%)
-        // (Valor + EndivSocio) / Patrimonio
         let ratioPat = (patrimonio > 0) ? (valorProposta + endivSocio) / patrimonio : 999;
         let descPat = procvAproximado(ratioPat, TABELA_ENDIVIDAMENTO_PATRIMONIO);
         totalBonus += descPat;
         debug.push(`Endiv x Patr: ${formatPercent(descPat)}`);
 
-        // C) Produtos
         const qtdProd = document.querySelectorAll('.prod-check:checked').length;
         let descProd = procvAproximado(qtdProd, TABELA_PRODUTOS);
         totalBonus += descProd;
         debug.push(`Produtos: ${formatPercent(descProd)}`);
 
-        // D) Riscos
         let descRiscoS = getDescontoRisco(document.getElementById('riscoSocio').value);
         totalBonus += descRiscoS;
         
@@ -578,11 +598,9 @@
         totalBonus += descRiscoO;
         debug.push(`Risco S/O: ${formatPercent(descRiscoS)} / ${formatPercent(descRiscoO)}`);
 
-        // E) Recebimento
         let descRec = document.getElementById('recebimento').value === 'sim' ? 0.02 : 0.00;
         totalBonus += descRec;
 
-        // F) Tempo Associação
         let anosAssoc = 0;
         const dataStr = document.getElementById('dataAssociacao').value;
         if (dataStr) {
@@ -592,15 +610,12 @@
         totalBonus += descTempo;
         debug.push(`Tempo (${anosAssoc.toFixed(1)}a): ${formatPercent(descTempo)}`);
 
-        // G) Prazo
         let descPrazo = procvAproximado(prazoMeses, TABELA_PRAZO_OP);
         totalBonus += descPrazo;
         debug.push(`Prazo: ${formatPercent(descPrazo)}`);
 
-        // H) Modalidade (Capacidade Pagamento)
         let ratioCapac = 0;
         if (rendaMensal > 0 && prazoMeses > 0) {
-            // Formula Urbano calibrada: (EndivSocio/12 + Proposta/Prazo) / Renda
             ratioCapac = ((endivSocio / 12) + (valorProposta / prazoMeses)) / rendaMensal;
         }
         const mod = document.getElementById('modalidade').value;
@@ -608,14 +623,19 @@
         totalBonus += descMod;
         debug.push(`Modalidade: ${formatPercent(descMod)}`);
 
-        // 3. Resultados Finais
-        // Taxa Final = Base - (Base * TotalBonus)
-        let taxaFinalMes = taxaBaseMes - (taxaBaseMes * totalBonus);
-        if (taxaFinalMes < 0) taxaFinalMes = 0;
-        
-        let taxaFinalAno = Math.pow((1 + taxaFinalMes), 12) - 1;
+        let taxaFinalMes = 0;
+        let taxaFinalAno = 0;
 
-        // Renderização
+        if (modeloDados.anual) {
+            taxaFinalAno = taxaBaseAno * (1 - totalBonus);
+            if (taxaFinalAno < 0) taxaFinalAno = 0;
+            taxaFinalMes = Math.pow((1 + taxaFinalAno), (1/12)) - 1;
+        } else {
+            taxaFinalMes = taxaBaseMes * (1 - totalBonus);
+            if (taxaFinalMes < 0) taxaFinalMes = 0;
+            taxaFinalAno = Math.pow((1 + taxaFinalMes), 12) - 1;
+        }
+
         document.getElementById('outTaxaPadrao').innerText = formatPercent(taxaBaseMes);
         document.getElementById('outTotalDescontos').innerText = formatPercent(totalBonus);
         document.getElementById('outTaxaFinalMes').innerText = formatPercent(taxaFinalMes);
@@ -624,7 +644,6 @@
         document.getElementById('debugDescontos').innerHTML = `<strong>Bônus:</strong> ` + debug.join(' | ');
     }
 
-    // Init
     window.onload = calcular;
 </script>
 

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organograma CrediSeara</title>
+    
+    <!-- Tipografia Moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-dark: #1B5E20;    /* Verde Floresta Escuro (Alta Gestão) */
+            --primary-mid: #2E7D32;     /* Verde Médio (Diretorias/Gerentes) */
+            --primary-light: #4CAF50;   /* Verde Acento */
+            --secondary-bg: #E8F5E9;    /* Verde Pastel (Fundo Cartões) */
+            --bg-color: #FFF;        /* Fundo da Página */
+            --connector-color: #A5D6A7; /* Cor das linhas de conexão */
+            --text-dark: #1c2e20;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 15px rgba(46, 125, 50, 0.2);
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 50px;
+        }
+
+        /* --- HEADER & NAVIGATION --- */
+        header {
+            background-color: var(--bg-color);
+            color: var(--primary-dark);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .btn-toggle {
+            background: transparent;
+            border: 2px solid var(--primary-mid);
+            color: var(--primary-mid);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-toggle:hover {
+            background: var(--secondary-bg);
+        }
+
+        .btn-toggle.active {
+            background: var(--primary-mid);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+        }
+
+        /* --- CONTAINER VIEWS --- */
+        .view-section {
+            display: none;
+            width: 100%;
+            max-width: 1600px; /* Large container for the tree */
+            margin: 0 auto;
+            padding: 0 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- HIERARCHICAL TREE VIEW (CSS MAGIC) --- */
+        
+        /* Container scrollable para mobile */
+        .tree-container {
+            overflow-x: auto;
+            padding-top: 20px;
+            text-align: center;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-mid) #eee;
+            cursor: grab;
+        }
+        
+        .tree-container:active {
+            cursor: grabbing;
+        }
+
+        .tree {
+            display: inline-table; /* Permite centralizar a árvore inteira */
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        .tree ul {
+            padding-top: 20px; 
+            position: relative;
+            transition: all 0.5s;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tree li {
+            float: left; text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 20px 5px 0 5px;
+            transition: all 0.5s;
+        }
+
+        /* Desenhando as linhas (Connectors) */
+        .tree li::before, .tree li::after {
+            content: '';
+            position: absolute; top: 0; right: 50%;
+            border-top: 2px solid var(--connector-color);
+            width: 50%; height: 20px;
+        }
+        .tree li::after {
+            right: auto; left: 50%;
+            border-left: 2px solid var(--connector-color);
+        }
+
+        /* Remove conectores dos primeiros e últimos nós para não ter linhas sobrando */
+        .tree li:only-child::after, .tree li:only-child::before {
+            display: none;
+        }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::before, .tree li:last-child::after {
+            border: 0 none;
+        }
+        /* Adiciona a linha vertical para o último nó */
+        .tree li:last-child::before{
+            border-right: 2px solid var(--connector-color);
+            border-radius: 0 5px 0 0;
+        }
+        .tree li:first-child::after{
+            border-radius: 5px 0 0 0;
+        }
+
+        /* Linha vertical descendo do pai */
+        .tree ul ul::before{
+            content: '';
+            position: absolute; top: 0; left: 50%;
+            border-left: 2px solid var(--connector-color);
+            width: 0; height: 20px;
+        }
+
+        /* --- TREE CARDS --- */
+        .tree .card {
+            background: var(--white);
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #666;
+            display: inline-block;
+            border-radius: var(--radius);
+            transition: all 0.3s;
+            min-width: 140px;
+            position: relative;
+            z-index: 10;
+            box-shadow: var(--shadow);
+        }
+
+        .tree .card:hover {
+            background: var(--secondary-bg);
+            border-color: var(--primary-mid);
+            color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Estilos específicos por Nível Hierárquico */
+        
+        /* Nível 1: Estratégico */
+        .tree .level-1 .card {
+            background: var(--primary-dark);
+            color: white;
+            font-weight: 700;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            min-width: 180px;
+        }
+        
+        /* Nível 2: Conselhos */
+        .tree .level-2 .card {
+            background: var(--primary-mid);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Nível 3: Diretoria Executiva */
+        .tree .level-3 .card {
+            background: #66BB6A; /* Verde um pouco mais claro */
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Nível 4: Órgãos de Controle & Áreas */
+        .tree .level-4 .card {
+            border-left: 4px solid var(--primary-mid);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Títulos de função dentro dos cards */
+        .card-role {
+            display: block;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+        
+        /* Lista interna para PAs (para economizar espaço horizontal) */
+        .pa-internal-list {
+            text-align: left;
+            margin-top: 8px;
+            padding-left: 0;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
+        .pa-internal-list li {
+            float: none !important;
+            padding: 2px 0 !important;
+            font-size: 0.75rem;
+            color: #555;
+            list-style: none;
+            border: none;
+        }
+        .pa-internal-list li::before, .pa-internal-list li::after {
+            display: none !important;
+        }
+        .arrow-down {
+            font-size: 0.6rem;
+            color: var(--primary-mid);
+            margin: 0 3px;
+        }
+
+        /* Wrapper especial para os PAs para eles ficarem agrupados */
+        .pa-group {
+            display: flex;
+            gap: 10px;
+            padding-top: 10px;
+        }
+
+        /* --- FUNCTIONAL GRID VIEW --- */
+        .functional-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .func-column {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .func-column:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .func-header {
+            background: var(--primary-mid);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .func-header h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .func-header span {
+            font-size: 3rem; /* Icon size */
+            display: block;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .func-body {
+            padding: 1.5rem;
+            background: var(--secondary-bg); /* Verde bem clarinho */
+            height: 100%;
+        }
+
+        .func-list {
+            list-style: none;
+        }
+
+        .func-list li {
+            background: white;
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-mid);
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: margin-left 0.2s;
+        }
+
+        .func-list li:hover {
+            margin-left: 5px;
+            cursor: default;
+        }
+
+        .func-sublist {
+            margin-top: 5px;
+            padding-left: 10px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        /* --- RESPONSIVE ADJUSTMENTS --- */
+        @media (max-width: 900px) {
+            .functional-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tree li {
+                padding: 20px 2px 0 2px;
+            }
+            
+            .tree .card {
+                min-width: 100px;
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CrediSeara</h1>
+        <div class="subtitle">Intranet Corporativa</div>
+    </header>
+
+    <div class="controls">
+        <button class="btn-toggle active" onclick="switchTab('hierarchical')">Estrutura Hierárquica</button>
+        <button class="btn-toggle" onclick="switchTab('functional')">Estrutura Funcional</button>
+    </div>
+
+    <!-- ABA 1: HIERÁRQUICO -->
+    <section id="hierarchical" class="view-section active">
+        <div class="tree-container">
+            <div class="tree">
+                <ul>
+                    <!-- Nível 1: Topo -->
+                    <li class="level-1">
+                        <div class="card">Assembleia Geral</div>
+                        <ul>
+                            <!-- Ramo Lateral: Conselho Fiscal -->
+                            <li class="level-2">
+                                <div class="card">Conselho Fiscal</div>
+                            </li>
+                            
+                            <!-- Ramo Principal: Conselho Adm -->
+                            <li class="level-2">
+                                <div class="card">Conselho de<br>Administração</div>
+                                <ul>
+                                    <!-- Nível 3: Diretoria Executiva -->
+                                    <li class="level-3">
+                                        <div class="card">Diretoria Executiva</div>
+                                        
+                                        <!-- Abaixo da Diretoria Executiva -->
+                                        <ul>
+                                            
+                                            <!-- Grupo: Órgãos de Controle (Governança) -->
+                                            <li class="level-4">
+                                                <div class="card">Órgãos de Controle</div>
+                                                <ul>
+                                                    <li><div class="card">Ouvidoria</div></li>
+                                                    <li><div class="card">Compliance &<br>Riscos</div></li>
+                                                    <li><div class="card">Auditoria</div></li>
+                                                    <li><div class="card">Controladoria</div></li>
+                                                </ul>
+                                            </li>
+
+                                            <!-- Grupo: Retaguarda (Coordenador) -->
+                                            <li class="level-4">
+                                                <div class="card">Retaguarda<br><span class="card-role">Coordenador</span></div>
+                                                <ul>
+                                                    <li>
+                                                        <div class="card">Administrativo</div>
+                                                        <ul>
+                                                            <li><div class="card">RH & Mkt</div></li>
+                                                            <li><div class="card">TI</div></li>
+                                                            <li><div class="card">Financeiro</div></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li>
+                                                        <div class="card">Operações</div>
+                                                        <ul>
+                                                            <li><div class="card">Crédito</div></li>
+                                                            <li><div class="card">Produtos</div></li>
+                                                            <li><div class="card">SPB</div></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+
+                                            <!-- Grupo: ATER (Gerente) -->
+                                            <li class="level-4">
+                                                <div class="card">ATER<br><span class="card-role">Gerente</span></div>
+                                                <ul>
+                                                    <li><div class="card">Assist. Técnica<br>Rural</div></li>
+                                                    <li><div class="card">Prog. Sociais<br>& Ambientais</div></li>
+                                                </ul>
+                                            </li>
+
+                                            <!-- Grupo: Rede de Agências (PAs) -->
+                                            <li class="level-4">
+                                                <div class="card">Rede de Agências</div>
+                                                <ul>
+                                                    <!-- PA Matriz -->
+                                                    <li>
+                                                        <div class="card">
+                                                            Matriz PA Seara
+                                                            <ul class="pa-internal-list">
+                                                                <li>Gerente PA</li>
+                                                                <li><span class="arrow-down">▼</span></li>
+                                                                <li>Ger. Carteira</li>
+                                                                <li><span class="arrow-down">▼</span></li>
+                                                                <li>Assistente</li>
+                                                                <li><span class="arrow-down">▼</span></li>
+                                                                <li>Caixa</li>
+                                                            </ul>
+                                                        </div>
+                                                    </li>
+                                                    <!-- PA Itá -->
+                                                    <li>
+                                                        <div class="card">PA Itá
+                                                            <div class="card-role">Equipe Completa</div>
+                                                        </div>
+                                                    </li>
+                                                    <!-- PA Arvoredo -->
+                                                    <li>
+                                                        <div class="card">PA Arvoredo
+                                                            <div class="card-role">Equipe Completa</div>
+                                                        </div>
+                                                    </li>
+                                                    <!-- PA Paial -->
+                                                    <li>
+                                                        <div class="card">PA Paial
+                                                            <div class="card-role">Equipe Completa</div>
+                                                        </div>
+                                                    </li>
+                                                    <!-- PA Arabutã -->
+                                                    <li>
+                                                        <div class="card">PA Arabutã
+                                                            <div class="card-role">Equipe Completa</div>
+                                                        </div>
+                                                    </li>
+                                                    <!-- PA Concórdia -->
+                                                    <li>
+                                                        <div class="card">PA Concórdia
+                                                            <div class="card-role">Equipe Completa</div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+
+                                        </ul> <!-- Fim abaixo da Diretoria -->
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABA 2: FUNCIONAL -->
+    <section id="functional" class="view-section">
+        <div class="functional-grid">
+            
+            <!-- Coluna 1: Financeira -->
+            <article class="func-column">
+                <div class="func-header">
+                    <span>📊</span>
+                    <h3>Diretoria Financeira</h3>
+                </div>
+                <div class="func-body">
+                    <ul class="func-list">
+                        <li>
+                            <strong>Controladoria</strong>
+                            <div class="func-sublist">Controller, Controles Internos, Risco</div>
+                        </li>
+                        <li>
+                            <strong>Financeiro</strong>
+                            <div class="func-sublist">Contas a pagar, Contabilidade</div>
+                        </li>
+                        <li>
+                            <strong>Conformidade</strong>
+                            <div class="func-sublist">Compliance, Auditoria</div>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+
+            <!-- Coluna 2: Administrativa -->
+            <article class="func-column">
+                <div class="func-header">
+                    <span>⚙️</span>
+                    <h3>Diretoria Administrativa</h3>
+                </div>
+                <div class="func-body">
+                    <ul class="func-list">
+                        <li>
+                            <strong>Seguridade</strong>
+                            <div class="func-sublist">Seguros, Consórcio, Previdência, Capitalização</div>
+                        </li>
+                        <li>
+                            <strong>Recursos Humanos</strong>
+                        </li>
+                        <li>
+                            <strong>Gestão Corporativa</strong>
+                            <div class="func-sublist">Tecnologia, Marketing, Inteligência, Inovação</div>
+                        </li>
+                        <li>
+                            <strong>Conta Corrente</strong>
+                            <div class="func-sublist">INSS, Portabilidade, Cobrança, Cartão, PIX, Cheque, TED</div>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+
+            <!-- Coluna 3: Comercial -->
+            <article class="func-column">
+                <div class="func-header">
+                    <span>🤝</span>
+                    <h3>Diretoria Comercial</h3>
+                </div>
+                <div class="func-body">
+                    <ul class="func-list">
+                        <li>
+                            <strong>Postos de Atendimento</strong>
+                            <div class="func-sublist">Gerente Geral, Gerente de Carteira, Crédito, Técnico Agro, Caixa, Auxiliar</div>
+                        </li>
+                        <li>
+                            <strong>Estratégia</strong>
+                            <div class="func-sublist">Expansão, Negócios</div>
+                        </li>
+                        <li>
+                            <strong>Performance</strong>
+                            <div class="func-sublist">Gestão de Indicadores</div>
+                        </li>
+                        <li>
+                            <strong>Técnico</strong>
+                            <div class="func-sublist">ATER (Assistência Técnica)</div>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <script>
+        function switchTab(viewId) {
+            // Remove active class from all sections
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Add active class to target section
+            document.getElementById(viewId).classList.add('active');
+
+            // Update buttons
+            document.querySelectorAll('.btn-toggle').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Highlight the correct button
+            // Finding button by onclick attribute content is a simple way for this standalone file
+            const activeBtn = Array.from(document.querySelectorAll('.btn-toggle'))
+                .find(b => b.getAttribute('onclick').includes(viewId));
+            
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+    </script>
+</body>
+</html>
