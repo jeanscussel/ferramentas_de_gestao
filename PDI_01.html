@@ -9,21 +9,17 @@
 
     <style>
         /* =========================================
-           CONFIGURAÇÕES GERAIS E VARIÁVEIS
+           ESTILOS DA INTERFACE (TELA DE USO)
            ========================================= */
         :root {
-            /* --- PERSONALIZE AQUI A COR DA MARCA --- */
-            --primary-color: #0056b3; /* Azul Corporativo */
-            --primary-hover: #004494;
-            
-            --secondary-color: #6c757d; /* Cinza Neutro */
+            --primary-color: #0056b3; 
+            --secondary-color: #6c757d; 
             --background-body: #f4f6f9;
             --background-card: #ffffff;
             --text-color: #333333;
             --border-color: #dee2e6;
             --success-color: #28a745;
             --danger-color: #dc3545;
-            
             --shadow: 0 4px 6px rgba(0,0,0,0.1);
             --radius: 8px;
         }
@@ -34,325 +30,76 @@
             font-family: 'Roboto', sans-serif;
             background-color: var(--background-body);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
+            margin: 0; padding: 0; line-height: 1.6;
         }
 
-        /* =========================================
-           LAYOUT & CONTAINER
-           ========================================= */
         .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            background: var(--background-card);
-            padding: 40px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
+            max-width: 1000px; margin: 40px auto; background: var(--background-card);
+            padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow);
+            min-height: 80vh; display: flex; flex-direction: column;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--primary-color);
+            text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-color);
             padding-bottom: 20px;
         }
 
-        header h1 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 24px;
-            text-transform: uppercase;
-        }
-
+        header h1 { color: var(--primary-color); margin: 0; font-size: 24px; text-transform: uppercase; }
         header p { color: var(--secondary-color); margin-top: 5px; }
+        .logo-placeholder { max-height: 60px; margin-bottom: 10px; font-weight: bold; color: var(--primary-color); }
 
-        /* --- PERSONALIZE AQUI O LOGO (URL) --- */
-        .logo-placeholder {
-            max-height: 60px;
-            margin-bottom: 10px;
-            /* Exemplo de como colocar imagem: content: url('https://sua-empresa.com/logo.png'); */
-        }
+        /* PDCA */
+        .pdca-wrapper { background: #fff; border: 1px solid #e9ecef; border-radius: var(--radius); padding: 20px; margin-bottom: 30px; }
+        .pdca-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .pdca-card { padding: 15px; border-radius: 8px; color: white; }
+        .pdca-card h3 { margin: 0 0 5px 0; font-size: 18px; }
+        .pdca-card p { margin: 0; font-size: 13px; opacity: 0.9; }
+        .bg-plan { background: linear-gradient(135deg, #0056b3, #004494); }
+        .bg-do { background: linear-gradient(135deg, #ffc107, #e0a800); color: #333 !important; }
+        .bg-check { background: linear-gradient(135deg, #28a745, #218838); }
+        .bg-act { background: linear-gradient(135deg, #dc3545, #c82333); }
 
-        /* =========================================
-           WIZARD (NAVEGAÇÃO POR PASSOS)
-           ========================================= */
-        .wizard-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            position: relative;
-        }
+        /* WIZARD */
+        .wizard-nav { display: flex; justify-content: space-between; margin-bottom: 30px; position: relative; }
+        .wizard-nav::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: #e9ecef; z-index: 0; transform: translateY(-50%); }
+        .step-indicator { position: relative; z-index: 1; background: #e9ecef; color: #6c757d; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: all 0.3s ease; border: 2px solid #fff; }
+        .step-indicator.active { background: var(--primary-color); color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(0,86,179,0.4); }
+        .step-indicator.completed { background: var(--success-color); color: white; }
+        .step-label { position: absolute; top: 45px; width: 120px; text-align: center; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--secondary-color); font-weight: 500; }
 
-        .wizard-nav::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #e9ecef;
-            z-index: 0;
-            transform: translateY(-50%);
-        }
-
-        .step-indicator {
-            position: relative;
-            z-index: 1;
-            background: #e9ecef;
-            color: #6c757d;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #fff;
-        }
-
-        .step-indicator.active {
-            background: var(--primary-color);
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(0,86,179,0.4);
-        }
-
-        .step-indicator.completed {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .step-label {
-            position: absolute;
-            top: 45px;
-            width: 120px;
-            text-align: center;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-
-        /* =========================================
-           CONTEÚDO DOS PASSOS (FORMS)
-           ========================================= */
-        .step-content {
-            display: none; /* Oculta todos por padrão */
-            animation: fadeIn 0.5s;
-            flex-grow: 1;
-        }
+        /* FORMULARIO */
+        .step-content { display: none; animation: fadeIn 0.5s; flex-grow: 1; }
+        .step-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .step-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .form-group { margin-bottom: 20px; }
-        
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #495057;
-        }
-
-        input[type="text"], input[type="date"], textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-family: 'Roboto', sans-serif;
-            font-size: 14px;
-            background-color: #fdfdfd;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0,86,179,0.1);
-        }
-
+        label { display: block; font-weight: 500; margin-bottom: 8px; color: #495057; }
+        input[type="text"], input[type="email"], input[type="date"], textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 4px; font-family: 'Roboto', sans-serif; font-size: 14px; background-color: #fdfdfd; }
         textarea { min-height: 120px; resize: vertical; }
-
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        /* Slider de Prontidão */
-        .range-container { text-align: center; padding: 20px; background: #f8f9fa; border-radius: var(--radius); }
-        input[type="range"] { width: 100%; cursor: pointer; }
-        .range-value { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-top: 10px; display: block; }
+        /* TABELA */
+        .action-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .action-table th { background: var(--primary-color); color: white; padding: 12px; text-align: left; font-size: 14px; }
+        .action-table td { padding: 8px; border-bottom: 1px solid var(--border-color); }
+        .action-table input, .action-table select { border: 1px solid #ced4da; padding: 8px; font-size: 13px; }
 
-        /* =========================================
-           TABELA DINÂMICA (PLANO DE AÇÃO)
-           ========================================= */
-        .action-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .action-table th {
-            background: var(--primary-color);
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        .action-table td {
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .action-table input, .action-table select {
-            border: 1px solid #ced4da;
-            padding: 8px;
-            font-size: 13px;
-        }
-
-        .btn-delete {
-            background: #fff;
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .btn-delete:hover { background: var(--danger-color); color: #fff; }
-
-        .btn-add-row {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-add-row:hover { background: #218838; }
-
-        /* =========================================
-           BOTÕES DE NAVEGAÇÃO DO FOOTER
-           ========================================= */
-        .footer-nav {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 15px;
-        }
-
+        /* BOTOES */
+        .footer-nav { margin-top: 40px; display: flex; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .btn { padding: 12px 25px; border: none; border-radius: 4px; font-weight: 500; cursor: pointer; font-size: 15px; }
         .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        
         .btn-secondary { background: var(--secondary-color); color: white; }
-        .btn-secondary:hover { background: #5a6268; }
-        
         .btn-outline { background: transparent; border: 1px solid var(--secondary-color); color: var(--secondary-color); }
         .btn-print { background: #17a2b8; color: white; margin-left: 10px; }
         .btn-reset { background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 12px; padding: 8px 15px; }
-
-        /* Checkbox customizado */
-        .agreement-box {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: var(--radius);
-            border-left: 5px solid var(--primary-color);
-            margin-top: 20px;
-        }
-
-        /* Área de Assinatura (Escondida na tela) */
-        .signature-section { display: none; }
-
-        /* =========================================
-           MÓDULO DE IMPRESSÃO (CRÍTICO)
-           ========================================= */
-        @media print {
-            @page { size: A4; margin: 1.5cm; }
-            
-            body { background: white; color: black; -webkit-print-color-adjust: exact; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; margin: 0; padding: 0; min-height: auto; }
-            
-            /* Esconder elementos de UI */
-            .wizard-nav, .footer-nav, .btn-add-row, .btn-delete, .btn, .range-container { display: none !important; }
-            
-            /* Mostrar todos os passos */
-            .step-content { display: block !important; margin-bottom: 30px; border-bottom: 1px solid #000; padding-bottom: 20px; opacity: 1; animation: none; }
-            
-            /* Transformar Inputs em "Texto" */
-            input, textarea, select {
-                border: none;
-                background: transparent;
-                resize: none;
-                padding: 0;
-                width: 100%;
-                font-family: 'Times New Roman', serif; /* Fonte mais formal para o papel */
-                font-size: 12pt;
-                color: black;
-            }
-            
-            /* Adicionar linhas onde havia inputs para dar cara de documento */
-            .form-group { margin-bottom: 10px; }
-            label { font-weight: bold; font-size: 10pt; text-transform: uppercase; color: #000; margin-bottom: 2px; }
-            
-            /* Estilo específico para valores preenchidos */
-            input[type="text"], textarea { border-bottom: 1px dotted #999; min-height: auto; }
-            
-            /* Header de Impressão */
-            header { border-bottom: 2px solid #000; margin-bottom: 20px; text-align: left; display: flex; justify-content: space-between; align-items: center; }
-            header h1 { font-size: 18pt; color: black; }
-            
-            /* Tabela de Impressão */
-            .action-table th { background: #ddd !important; color: black; border: 1px solid #000; font-weight: bold; }
-            .action-table td { border: 1px solid #000; }
-            .action-table input, .action-table select { border: none; font-size: 10pt; }
-
-            /* Visualização do Nível de Prontidão no Papel */
-            .print-readiness { display: block; margin-top: 5px; font-weight: bold; }
-            
-            /* Rodapé com Assinaturas */
-            .signature-section {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 50px;
-                page-break-inside: avoid;
-            }
-            .sign-box {
-                width: 45%;
-                border-top: 1px solid #000;
-                text-align: center;
-                padding-top: 10px;
-                font-size: 12px;
-            }
-
-            /* Esconder placeholder do logo se não tiver imagem */
-            .logo-placeholder { display: none; }
-        }
+        .btn-add-row { background: var(--success-color); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        .btn-delete { background: #fff; color: var(--danger-color); border: 1px solid var(--danger-color); border-radius: 4px; padding: 5px 10px; cursor: pointer; }
+        .agreement-box { background: #e3f2fd; padding: 20px; border-radius: var(--radius); border-left: 5px solid var(--primary-color); margin-top: 20px; }
+        
+        /* SLIDER */
+        .range-container { text-align: center; padding: 20px; background: #f8f9fa; border-radius: var(--radius); }
+        input[type="range"] { width: 100%; }
+        .range-value { font-size: 20px; font-weight: bold; color: var(--primary-color); display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -373,322 +120,337 @@
     </div>
 
     <div id="step1" class="step-content active">
+        <div class="pdca-wrapper">
+            <div class="pdca-title">Metodologia: O Ciclo PDCA neste PDI</div>
+            <div class="pdca-grid">
+                <div class="pdca-card bg-plan"><h3>1. Plan</h3><p>Defina objetivos.</p></div>
+                <div class="pdca-card bg-do"><h3>2. Do</h3><p>Estruture tarefas.</p></div>
+                <div class="pdca-card bg-check"><h3>3. Check</h3><p>Acompanhe e salve.</p></div>
+                <div class="pdca-card bg-act"><h3>4. Act</h3><p>Ajuste a rota.</p></div>
+            </div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
         <h2>Dados do Colaborador</h2>
         <div class="grid-2">
-            <div class="form-group">
-                <label>Nome do Colaborador:</label>
-                <input type="text" id="colaborador" placeholder="Nome completo">
-            </div>
-            <div class="form-group">
-                <label>Nome do Gestor:</label>
-                <input type="text" id="gestor" placeholder="Nome do gestor imediato">
-            </div>
-            <div class="form-group">
-                <label>Área / Setor:</label>
-                <input type="text" id="area" placeholder="Ex: Crédito, Comercial, TI">
-            </div>
-            <div class="form-group">
-                <label>Ciclo de Avaliação:</label>
-                <input type="text" id="ciclo" placeholder="Ex: 2025/1">
-            </div>
+            <div class="form-group"><label>Nome do Colaborador:</label><input type="text" id="colaborador" placeholder="Nome completo"></div>
+            <div class="form-group"><label>Selecione seu Gestor:</label><select id="gestor"><option value="">-- Selecione na lista --</option></select></div>
+            <div class="form-group"><label>E-mail do Gestor:</label><input type="text" id="emailGestor" readonly style="background-color: #e9ecef;"></div>
+            <div class="form-group"><label>Área / Setor:</label><input type="text" id="area" placeholder="Setor"></div>
+            <div class="form-group"><label>Ciclo:</label><input type="text" id="ciclo" placeholder="Ex: 2025/1"></div>
         </div>
     </div>
 
     <div id="step2" class="step-content">
         <h2>Diagnóstico Atual</h2>
+        <div class="form-group"><label>Pontos Fortes:</label><textarea id="pontosFortes"></textarea></div>
+        <div class="form-group"><label>Pontos a Desenvolver:</label><textarea id="pontosMelhorar"></textarea></div>
         <div class="form-group">
-            <label>Pontos Fortes (O que manter):</label>
-            <textarea id="pontosFortes" placeholder="Descreva as principais competências e habilidades já demonstradas..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>Pontos a Desenvolver (O que melhorar):</label>
-            <textarea id="pontosMelhorar" placeholder="Descreva gaps de competência, técnicos ou comportamentais..."></textarea>
-        </div>
-        
-        <div class="form-group">
-            <label>Nível de Prontidão Atual (Autoavaliação):</label>
+            <label>Prontidão:</label>
             <div class="range-container">
                 <input type="range" id="prontidao" min="1" max="5" value="3" oninput="updateRangeValue(this.value)">
                 <span class="range-value" id="prontidaoDisplay">Nível 3 - Competente</span>
-                <small style="color: #666; display: block; margin-top: 5px;">1: Iniciante | 5: Expert/Referência</small>
             </div>
-            <div class="print-readiness" style="display:none" id="printProntidao">Nível: 3</div>
         </div>
     </div>
 
     <div id="step3" class="step-content">
-        <h2>Definição de Objetivos</h2>
-        <div class="form-group">
-            <label>Objetivo Profissional de Curto Prazo (6 meses):</label>
-            <textarea id="objCurto" style="height: 80px" placeholder="Onde você quer chegar no próximo semestre?"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Objetivo Profissional de Médio Prazo (1-2 anos):</label>
-            <textarea id="objMedio" style="height: 80px" placeholder="Qual o próximo grande passo na carreira?"></textarea>
-        </div>
+        <h2>Objetivos</h2>
+        <div class="form-group"><label>Curto Prazo (6 meses):</label><textarea id="objCurto"></textarea></div>
+        <div class="form-group"><label>Médio Prazo (1-2 anos):</label><textarea id="objMedio"></textarea></div>
     </div>
 
     <div id="step4" class="step-content">
-        <h2>Plano de Ação (70/20/10)</h2>
-        <p style="font-size: 0.9rem; color: #666;">Defina ações concretas. Misture aprendizado prático (70%), trocas/mentoria (20%) e cursos/estudos (10%).</p>
-        
+        <h2>Plano de Ação</h2>
         <table class="action-table" id="acaoTable">
-            <thead>
-                <tr>
-                    <th style="width: 30%">O que fazer (Ação)</th>
-                    <th style="width: 25%">Como (Recurso)</th>
-                    <th style="width: 15%">Início</th>
-                    <th style="width: 15%">Fim</th>
-                    <th style="width: 10%">Status</th>
-                    <th style="width: 5%"></th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <thead><tr><th style="width: 30%">Ação</th><th style="width: 25%">Recurso</th><th style="width: 15%">Início</th><th style="width: 15%">Fim</th><th style="width: 10%">Status</th><th style="width: 5%"></th></tr></thead>
+            <tbody id="tableBody"></tbody>
         </table>
-        <button class="btn-add-row" onclick="addTableRow()">+ Adicionar Ação</button>
+        <button class="btn-add-row" onclick="addTableRow()">+ Ação</button>
     </div>
 
     <div id="step5" class="step-content">
-        <h2>Acordo e Validação</h2>
-        <div class="form-group">
-            <label>Comentários Finais do Gestor:</label>
-            <textarea id="comentariosGestor" placeholder="Espaço reservado para o gestor..."></textarea>
-        </div>
-
-        <div class="agreement-box">
-            <label style="display: flex; align-items: center; cursor: pointer;">
-                <input type="checkbox" id="acordoCheck" style="width: 20px; height: 20px; margin-right: 10px;">
-                Estou de acordo com este Plano de Desenvolvimento Individual e comprometo-me a executá-lo.
-            </label>
-        </div>
-    </div>
-
-    <div class="signature-section">
-        <div class="sign-box">
-            Assinatura do Colaborador
-            <br><br><br>
-            ____________________________________
-        </div>
-        <div class="sign-box">
-            Assinatura do Gestor
-            <br><br><br>
-            ____________________________________
-        </div>
+        <h2>Acordo</h2>
+        <div class="form-group"><label>Comentários do Gestor:</label><textarea id="comentariosGestor"></textarea></div>
+        <div class="agreement-box"><label style="display: flex; align-items: center;"><input type="checkbox" id="acordoCheck" style="margin-right: 10px;"> Estou de acordo.</label></div>
     </div>
 
     <div class="footer-nav">
-        <div>
-            <button class="btn btn-reset" onclick="clearData()">Limpar Dados</button>
-        </div>
+        <div><button class="btn btn-reset" onclick="clearData()">Limpar</button></div>
         <div>
             <button class="btn btn-outline" id="btnPrev" onclick="prevStep()" style="display: none;">Voltar</button>
             <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Próximo</button>
-            <button class="btn btn-print" id="btnPrint" onclick="window.print()" style="display: none;">Gerar PDF / Imprimir</button>
+            <button class="btn btn-secondary" id="btnExport" style="display: none; margin-left: 10px; background-color: #28a745; border: none;">Excel</button>
+            <button class="btn btn-print" id="btnPrint" style="display: none;">Imprimir PDF</button>
+            <button class="btn btn-primary" id="btnSync" style="margin-right: 10px; background-color: #ffc107; color: #000; border: none; display: none;">☁️ Salvar Nuvem</button>
         </div>
     </div>
 </div>
 
 <script>
-    /* =========================================
-       LÓGICA DA APLICAÇÃO (JAVASCRIPT PURO)
-       ========================================= */
-    
     let currentStep = 1;
     const totalSteps = 5;
     const storageKey = 'pdi_cooperativa_data_v1';
+    
+    // SUA URL DO GOOGLE SCRIPT
+    const googleScriptURL = 'https://script.google.com/macros/s/AKfycbzYRQyq_AYW85qKdHzBbVY0uhzbXjWAgvrH9z0cWEIfo217lFQDuUJvmHy7XfYr8z0-zg/exec';
 
-    // Estrutura de dados inicial
-    let pdiData = {
-        colaborador: '', gestor: '', area: '', ciclo: '',
-        pontosFortes: '', pontosMelhorar: '', prontidao: '3',
-        objCurto: '', objMedio: '',
-        acoes: [], // Array de objetos para a tabela
-        comentariosGestor: '', acordoCheck: false
-    };
+    const listaGestores = [
+        { nome: "Ana Caroline", email: "ana.caroline@crediseara.coop.br" },
+        { nome: "Cristian Scussel", email: "cristiaan.scussel@crediseara.coop.br" },
+        { nome: "Rosangela Larroid", email: "rosangela.larroid@crediseara.coop.br" },
+        { nome: "Elizane Capelesso.", email: "elizane.capelesso@crediseara.coop.br" },
+        { nome: "Samara Gollo", email: "samara.gollo@crediseara.coop.br" },
+        { nome: "Rafael Broetto", email: "rafael.broetto@crediseara.coop.br" },
+        { nome: "Anderson Buth", email: "anderson.buth@crediseara.coop.br" }
+    ];
 
-    // Inicialização
+    let pdiData = { colaborador: '', gestor: '', emailGestor: '', area: '', ciclo: '', pontosFortes: '', pontosMelhorar: '', prontidao: '3', objCurto: '', objMedio: '', acoes: [], comentariosGestor: '', acordoCheck: false };
+
     document.addEventListener('DOMContentLoaded', () => {
-        loadData();
-        renderStep();
-        setupAutoSave();
+        setupManagers(); loadData(); renderStep(); setupAutoSave();
+
+        // Listeners
+        const btnSync = document.getElementById('btnSync');
+        if (btnSync) btnSync.addEventListener('click', syncToGoogleSheets);
+        
+        const btnExport = document.getElementById('btnExport');
+        if (btnExport) btnExport.addEventListener('click', exportToCSV);
+
+        // AQUI ESTÁ A CORREÇÃO: Listener para o novo método de impressão
+        const btnPrint = document.getElementById('btnPrint');
+        if (btnPrint) {
+            btnPrint.addEventListener('click', printExternalWindow);
+        }
     });
 
-    // --- NAVEGAÇÃO WIZARD ---
+    // ==========================================================
+    // NOVA FUNÇÃO DE IMPRESSÃO (TÉCNICA DE NOVA JANELA / POPUP)
+    // ==========================================================
+    function printExternalWindow() {
+        // Cria a estrutura HTML da tabela de ações
+        let rowsHtml = '';
+        if (pdiData.acoes && pdiData.acoes.length > 0) {
+            pdiData.acoes.forEach(a => {
+                rowsHtml += `
+                    <tr>
+                        <td>${sanitizeHTML(a.acao)}</td>
+                        <td>${sanitizeHTML(a.recurso)}</td>
+                        <td>${formatDate(a.inicio)}</td>
+                        <td>${formatDate(a.fim)}</td>
+                        <td>${a.status}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            rowsHtml = '<tr><td colspan="5">Nenhuma ação cadastrada.</td></tr>';
+        }
+
+        // Conteúdo da Nova Janela
+        const printContent = `
+            <html>
+            <head>
+                <title>PDI - ${pdiData.colaborador}</title>
+                <style>
+                    body { font-family: 'Times New Roman', serif; padding: 40px; color: #000; }
+                    h1 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px; font-size: 24px; }
+                    h2 { background: #eee; border: 1px solid #000; padding: 5px 10px; margin-top: 20px; font-size: 16px; text-transform: uppercase; }
+                    .field-label { font-weight: bold; font-size: 12px; text-transform: uppercase; margin-top: 10px; display: block; }
+                    .field-value { border-bottom: 1px dotted #666; display: block; padding: 3px 0; min-height: 20px; margin-bottom: 10px; }
+                    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+                    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                    th { background: #ddd; font-weight: bold; }
+                    .signatures { margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+                    .sign-box { width: 45%; border-top: 1px solid #000; text-align: center; padding-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <h1>Plano de Desenvolvimento Individual</h1>
+                
+                <h2>1. Dados Gerais</h2>
+                <div class="grid-2">
+                    <div><span class="field-label">Colaborador</span><span class="field-value">${sanitizeHTML(pdiData.colaborador)}</span></div>
+                    <div><span class="field-label">Gestor</span><span class="field-value">${sanitizeHTML(pdiData.gestor)}</span></div>
+                    <div><span class="field-label">Área</span><span class="field-value">${sanitizeHTML(pdiData.area)}</span></div>
+                    <div><span class="field-label">Ciclo</span><span class="field-value">${sanitizeHTML(pdiData.ciclo)}</span></div>
+                </div>
+
+                <h2>2. Diagnóstico</h2>
+                <span class="field-label">Pontos Fortes</span>
+                <div class="field-value" style="height: auto; white-space: pre-wrap;">${sanitizeHTML(pdiData.pontosFortes)}</div>
+                
+                <span class="field-label">Pontos a Desenvolver</span>
+                <div class="field-value" style="height: auto; white-space: pre-wrap;">${sanitizeHTML(pdiData.pontosMelhorar)}</div>
+                
+                <span class="field-label">Nível de Prontidão (Autoavaliação)</span>
+                <div class="field-value">Nível ${pdiData.prontidao}</div>
+
+                <h2>3. Objetivos</h2>
+                <div class="grid-2">
+                    <div><span class="field-label">Curto Prazo</span><span class="field-value" style="height: auto; white-space: pre-wrap;">${sanitizeHTML(pdiData.objCurto)}</span></div>
+                    <div><span class="field-label">Médio Prazo</span><span class="field-value" style="height: auto; white-space: pre-wrap;">${sanitizeHTML(pdiData.objMedio)}</span></div>
+                </div>
+
+                <h2>4. Plano de Ação</h2>
+                <table>
+                    <thead><tr><th>Ação</th><th>Recurso</th><th>Início</th><th>Fim</th><th>Status</th></tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+
+                <h2>5. Acordo</h2>
+                <span class="field-label">Comentários do Gestor</span>
+                <div class="field-value" style="height: auto; white-space: pre-wrap;">${sanitizeHTML(pdiData.comentariosGestor)}</div>
+                <div style="margin-top: 20px; font-weight: bold;">
+                    [ ${pdiData.acordoCheck ? 'X' : ' '} ] Estou de acordo com este plano.
+                </div>
+
+                <div class="signatures">
+                    <div class="sign-box">Assinatura do Colaborador</div>
+                    <div class="sign-box">Assinatura do Gestor</div>
+                </div>
+                
+                <script>
+                    window.onload = function() { window.print(); window.close(); }
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        // Abre a nova janela
+        const win = window.open('', '_blank', 'height=700,width=900');
+        if (win) {
+            win.document.write(printContent);
+            win.document.close(); // Essencial para terminar o carregamento
+        } else {
+            alert("Bloqueador de Pop-ups detectado! Por favor, permita pop-ups para imprimir.");
+        }
+    }
+
+    // Auxiliares
+    function sanitizeHTML(str) { return str ? str.replace(/</g, "&lt;").replace(/>/g, "&gt;") : ''; }
+    function formatDate(dateStr) { 
+        if(!dateStr) return '-'; 
+        const parts = dateStr.split('-'); 
+        return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr; 
+    }
+
+    // --- FUNÇÕES DE LÓGICA DO PDI (MANTER IGUAL) ---
+    function setupManagers() {
+        const select = document.getElementById('gestor');
+        const emailInput = document.getElementById('emailGestor');
+        select.innerHTML = '<option value="">-- Selecione na lista --</option>';
+        listaGestores.forEach(g => {
+            const option = document.createElement('option');
+            option.value = g.nome; option.textContent = g.nome; option.setAttribute('data-email', g.email); 
+            select.appendChild(option);
+        });
+        select.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            emailInput.value = selectedOption.getAttribute('data-email') || '';
+            pdiData.gestor = e.target.value; pdiData.emailGestor = emailInput.value; saveData();
+        });
+    }
+
     function renderStep() {
-        // Esconder todos
         document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.step-indicator').forEach(el => el.classList.remove('active', 'completed'));
-
-        // Mostrar atual
         document.getElementById(`step${currentStep}`).classList.add('active');
         
-        // Atualizar bolinhas
         for(let i = 1; i <= totalSteps; i++) {
             const el = document.querySelector(`.wizard-nav .step-indicator:nth-child(${i})`);
             if (i === currentStep) el.classList.add('active');
             if (i < currentStep) el.classList.add('completed');
         }
 
-        // Botões
         const btnPrev = document.getElementById('btnPrev');
         const btnNext = document.getElementById('btnNext');
         const btnPrint = document.getElementById('btnPrint');
+        const btnSync = document.getElementById('btnSync');
+        const btnExport = document.getElementById('btnExport');
 
         btnPrev.style.display = currentStep === 1 ? 'none' : 'inline-block';
         
         if (currentStep === totalSteps) {
-            btnNext.style.display = 'none';
-            btnPrint.style.display = 'inline-block';
+            btnNext.style.display = 'none'; btnPrint.style.display = 'inline-block'; btnSync.style.display = 'inline-block'; btnExport.style.display = 'inline-block';
         } else {
-            btnNext.style.display = 'inline-block';
-            btnNext.textContent = 'Próximo';
-            btnPrint.style.display = 'none';
+            btnNext.style.display = 'inline-block'; btnNext.textContent = 'Próximo'; btnPrint.style.display = 'none'; btnSync.style.display = 'none'; btnExport.style.display = 'none';
         }
     }
 
-    function nextStep() {
-        if (currentStep < totalSteps) {
-            currentStep++;
-            renderStep();
-            window.scrollTo(0, 0);
-        }
-    }
+    function nextStep() { if (currentStep < totalSteps) { currentStep++; renderStep(); window.scrollTo(0, 0); } }
+    function prevStep() { if (currentStep > 1) { currentStep--; renderStep(); } }
+    function goToStep(step) { currentStep = step; renderStep(); }
 
-    function prevStep() {
-        if (currentStep > 1) {
-            currentStep--;
-            renderStep();
-        }
-    }
-
-    function goToStep(step) {
-        currentStep = step;
-        renderStep();
-    }
-
-    // --- TABELA DINÂMICA ---
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
-
-        if (pdiData.acoes.length === 0) {
-            // Adiciona uma linha vazia se não houver nada
-            pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'});
-        }
-
+        if (pdiData.acoes.length === 0) pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'});
         pdiData.acoes.forEach((row, index) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" value="${row.acao}" oninput="updateRow(${index}, 'acao', this.value)" placeholder="Descreva a ação"></td>
-                <td><input type="text" value="${row.recurso}" oninput="updateRow(${index}, 'recurso', this.value)" placeholder="O que precisa?"></td>
-                <td><input type="date" value="${row.inicio}" oninput="updateRow(${index}, 'inicio', this.value)"></td>
-                <td><input type="date" value="${row.fim}" oninput="updateRow(${index}, 'fim', this.value)"></td>
-                <td>
-                    <select onchange="updateRow(${index}, 'status', this.value)">
-                        <option value="NaoIniciado" ${row.status === 'NaoIniciado' ? 'selected' : ''}>A Iniciar</option>
-                        <option value="EmAndamento" ${row.status === 'EmAndamento' ? 'selected' : ''}>Em Andamento</option>
-                        <option value="Concluido" ${row.status === 'Concluido' ? 'selected' : ''}>Concluído</option>
-                    </select>
-                </td>
-                <td style="text-align:center">
-                    <button class="btn-delete" onclick="deleteRow(${index})" title="Excluir">X</button>
-                </td>
-            `;
+            tr.innerHTML = `<td><input type="text" value="${row.acao}" oninput="updateRow(${index}, 'acao', this.value)"></td><td><input type="text" value="${row.recurso}" oninput="updateRow(${index}, 'recurso', this.value)"></td><td><input type="date" value="${row.inicio}" oninput="updateRow(${index}, 'inicio', this.value)"></td><td><input type="date" value="${row.fim}" oninput="updateRow(${index}, 'fim', this.value)"></td><td><select onchange="updateRow(${index}, 'status', this.value)"><option value="NaoIniciado" ${row.status === 'NaoIniciado' ? 'selected' : ''}>A Iniciar</option><option value="EmAndamento" ${row.status === 'EmAndamento' ? 'selected' : ''}>Em Andamento</option><option value="Concluido" ${row.status === 'Concluido' ? 'selected' : ''}>Concluído</option></select></td><td style="text-align:center"><button class="btn-delete" onclick="deleteRow(${index})">X</button></td>`;
             tbody.appendChild(tr);
         });
     }
 
-    function addTableRow() {
-        pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'});
-        renderTable();
-        saveData();
-    }
+    function addTableRow() { pdiData.acoes.push({acao: '', recurso: '', inicio: '', fim: '', status: 'NaoIniciado'}); renderTable(); saveData(); }
+    function updateRow(index, field, value) { pdiData.acoes[index][field] = value; saveData(); }
+    function deleteRow(index) { if(confirm("Excluir?")) { pdiData.acoes.splice(index, 1); renderTable(); saveData(); } }
 
-    function updateRow(index, field, value) {
-        pdiData.acoes[index][field] = value;
-        saveData();
-    }
-
-    function deleteRow(index) {
-        if(confirm("Tem certeza que deseja excluir esta linha?")) {
-            pdiData.acoes.splice(index, 1);
-            renderTable();
-            saveData();
-        }
-    }
-
-    // --- PERSISTÊNCIA E FORMULÁRIO ---
-    
-    // Slider UI update
     window.updateRangeValue = function(val) {
         const labels = ["1 - Iniciante", "2 - Em Desenvolvimento", "3 - Competente", "4 - Avançado", "5 - Expert/Referência"];
         document.getElementById('prontidaoDisplay').textContent = `Nível ${val} - ${labels[val-1] || ''}`;
-        document.getElementById('printProntidao').textContent = `Nível Selecionado: ${val} (${labels[val-1] || ''})`;
-        
-        // Atualiza o dado
-        pdiData.prontidao = val;
-        saveData();
+        pdiData.prontidao = val; saveData();
     }
 
     function setupAutoSave() {
-        // Campos simples de texto
-        const simpleFields = ['colaborador', 'gestor', 'area', 'ciclo', 'pontosFortes', 'pontosMelhorar', 'objCurto', 'objMedio', 'comentariosGestor'];
-        
-        simpleFields.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.addEventListener('input', (e) => {
-                    pdiData[id] = e.target.value;
-                    saveData();
-                });
-            }
-        });
-
-        // Checkbox
-        document.getElementById('acordoCheck').addEventListener('change', (e) => {
-            pdiData.acordoCheck = e.target.checked;
-            saveData();
-        });
+        const simpleFields = ['colaborador', 'gestor', 'emailGestor', 'area', 'ciclo', 'pontosFortes', 'pontosMelhorar', 'objCurto', 'objMedio', 'comentariosGestor'];
+        simpleFields.forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('input', (e) => { pdiData[id] = e.target.value; saveData(); }); });
+        document.getElementById('acordoCheck').addEventListener('change', (e) => { pdiData.acordoCheck = e.target.checked; saveData(); });
     }
 
-    function saveData() {
-        localStorage.setItem(storageKey, JSON.stringify(pdiData));
-    }
-
+    function saveData() { localStorage.setItem(storageKey, JSON.stringify(pdiData)); }
     function loadData() {
         const saved = localStorage.getItem(storageKey);
         if (saved) {
             pdiData = JSON.parse(saved);
-            
-            // Repopular campos simples
             Object.keys(pdiData).forEach(key => {
-                if (key === 'acoes') return; // Tratado separado
-                
+                if (key === 'acoes') return;
                 const el = document.getElementById(key);
                 if (el) {
-                    if (key === 'acordoCheck') {
-                        el.checked = pdiData[key];
-                    } else if (key === 'prontidao') {
-                        el.value = pdiData[key];
-                        updateRangeValue(pdiData[key]);
-                    } else {
-                        el.value = pdiData[key];
-                    }
+                    if (key === 'acordoCheck') el.checked = pdiData[key];
+                    else if (key === 'prontidao') { el.value = pdiData[key]; updateRangeValue(pdiData[key]); }
+                    else el.value = pdiData[key];
                 }
             });
         }
-        // Sempre renderizar tabela, mesmo vazia (ou com dados salvos)
         renderTable();
     }
+    function clearData() { if(confirm("Apagar tudo?")) { localStorage.removeItem(storageKey); location.reload(); } }
 
-    function clearData() {
-        if(confirm("Isso apagará todos os dados preenchidos. Deseja continuar?")) {
-            localStorage.removeItem(storageKey);
-            location.reload();
-        }
+    function exportToCSV() {
+        const headers = ["Colaborador", "Gestor", "Email", "Area", "Ciclo", "Nivel", "Fortes", "Melhorar", "Acao", "Recurso", "Inicio", "Fim", "Status"];
+        let csvContent = headers.join(";") + "\n";
+        const listaAcoes = pdiData.acoes.length > 0 ? pdiData.acoes : [{acao: '', recurso: '', inicio: '', fim: '', status: ''}];
+        listaAcoes.forEach(item => {
+            const row = [sanitize(pdiData.colaborador), sanitize(pdiData.gestor), sanitize(pdiData.emailGestor), sanitize(pdiData.area), sanitize(pdiData.ciclo), sanitize(pdiData.prontidao), sanitize(pdiData.pontosFortes), sanitize(pdiData.pontosMelhorar), sanitize(item.acao), sanitize(item.recurso), sanitize(item.inicio), sanitize(item.fim), sanitize(item.status)];
+            csvContent += row.join(";") + "\n";
+        });
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url); link.setAttribute("download", `PDI_${pdiData.colaborador}.csv`);
+        link.style.visibility = 'hidden'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function sanitize(text) { if (!text) return ""; return text.toString().replace(/(\r\n|\n|\r)/gm, " ").replace(/;/g, ","); }
+
+    function syncToGoogleSheets() {
+        const btn = document.getElementById('btnSync');
+        if(btn) { btn.textContent = '...'; btn.disabled = true; }
+        fetch(googleScriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(pdiData) })
+        .then(() => { alert("✅ Salvo!"); if(btn) { btn.textContent = '☁️ Salvar Nuvem'; btn.disabled = false; } })
+        .catch(error => { console.error(error); alert("❌ Erro."); if(btn) { btn.textContent = 'Erro'; btn.disabled = false; } });
     }
 </script>
-
 </body>
 </html>
